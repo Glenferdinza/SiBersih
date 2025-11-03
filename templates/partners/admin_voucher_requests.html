@@ -1,0 +1,880 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin - Voucher Requests | SiBersih{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/animations.css' %}">
+<style>
+    body {
+        background: linear-gradient(135deg, #F0FDFA 0%, #ECFEFF 100%);
+        min-height: 100vh;
+    }
+
+    .admin-voucher-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        color: white;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin: 0 0 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.75rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-card.active {
+        border-color: var(--primary-teal);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .stat-icon.all { background: linear-gradient(135deg, #E0E7FF, #C7D2FE); color: #3730A3; }
+    .stat-icon.pending { background: linear-gradient(135deg, #FEF3C7, #FDE047); color: #92400E; }
+    .stat-icon.approved { background: linear-gradient(135deg, #D1FAE5, #6EE7B7); color: #065F46; }
+    .stat-icon.rejected { background: linear-gradient(135deg, #FEE2E2, #FCA5A5); color: #991B1B; }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-value {
+        font-size: 2.25rem;
+        font-weight: 800;
+        color: #0F172A;
+        line-height: 1;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.95rem;
+        color: #64748B;
+        font-weight: 500;
+    }
+
+    .requests-grid {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .request-card {
+        background: white;
+        border-radius: 18px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .request-card:hover {
+        box-shadow: 0 8px 30px rgba(20, 184, 166, 0.15);
+        border-color: var(--primary-teal);
+    }
+
+    .request-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid #F1F5F9;
+    }
+
+    .request-info {
+        flex: 1;
+    }
+
+    .request-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0F172A;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .voucher-type-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .voucher-type-tag.free_shipping {
+        background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
+        color: #1E40AF;
+    }
+
+    .voucher-type-tag.percentage_discount {
+        background: linear-gradient(135deg, #FEF3C7, #FDE047);
+        color: #92400E;
+    }
+
+    .voucher-type-tag.fixed_discount {
+        background: linear-gradient(135deg, #D1FAE5, #6EE7B7);
+        color: #065F46;
+    }
+
+    .voucher-type-tag.free_kg {
+        background: linear-gradient(135deg, #E0E7FF, #C7D2FE);
+        color: #3730A3;
+    }
+
+    .laundry-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #64748B;
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .status-badge {
+        padding: 0.625rem 1.25rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-badge.pending {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+
+    .status-badge.approved {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
+    .status-badge.rejected {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .request-details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .detail-box {
+        background: #F8FAFC;
+        border-radius: 12px;
+        padding: 1.25rem;
+        border-left: 4px solid var(--primary-teal);
+    }
+
+    .detail-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #64748B;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .detail-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0F172A;
+    }
+
+    .reason-box {
+        background: linear-gradient(135deg, #F0FDFA, #ECFEFF);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid var(--primary-teal);
+    }
+
+    .reason-label {
+        font-weight: 700;
+        color: #0D9488;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .reason-text {
+        color: #334155;
+        line-height: 1.6;
+    }
+
+    .request-meta {
+        display: flex;
+        gap: 2rem;
+        font-size: 0.875rem;
+        color: #94A3B8;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        border-radius: 12px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .btn-approve {
+        background: linear-gradient(135deg, #10B981, #059669);
+        color: white;
+    }
+
+    .btn-approve:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-reject {
+        background: linear-gradient(135deg, #EF4444, #DC2626);
+        color: white;
+    }
+
+    .btn-reject:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-detail {
+        background: #F1F5F9;
+        color: #475569;
+    }
+
+    .btn-detail:hover:not(:disabled) {
+        background: #E2E8F0;
+    }
+
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .empty-icon {
+        width: 120px;
+        height: 120px;
+        color: #CBD5E1;
+        margin: 0 auto 1.5rem;
+    }
+
+    .empty-title {
+        font-size: 1.5rem;
+        color: #475569;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-text {
+        color: #94A3B8;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #0F172A;
+        flex: 1;
+    }
+
+    .modal-close {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: none;
+        background: #F1F5F9;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .modal-close:hover {
+        background: #E2E8F0;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-textarea {
+        width: 100%;
+        padding: 0.875rem;
+        border: 2px solid #E2E8F0;
+        border-radius: 12px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        resize: vertical;
+        min-height: 120px;
+        transition: all 0.3s ease;
+    }
+
+    .form-textarea:focus {
+        outline: none;
+        border-color: var(--primary-teal);
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .stats-row {
+            grid-template-columns: 1fr;
+        }
+
+        .request-card-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .request-title {
+            font-size: 1.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-voucher-container">
+    <!-- Page Header -->
+    <div class="page-header animated-bg">
+        <div class="bg-decorator bubble-1"></div>
+        <div class="bg-decorator bubble-2"></div>
+        <div class="bg-decorator wave"></div>
+        
+        <h1>
+            <svg width="40" height="40">
+                <use href="{% static 'icons/icons.svg' %}#icon-shield"></use>
+            </svg>
+            Voucher Requests Management
+        </h1>
+        <p>Review dan kelola permintaan voucher dari mitra laundry</p>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+        <div class="stat-card animated-bg glow-on-hover filter-stat" data-filter="all">
+            <div class="stat-icon all">
+                <svg width="28" height="28">
+                    <use href="{% static 'icons/icons.svg' %}#icon-voucher"></use>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ total_requests }}</div>
+                <div class="stat-label">Total Requests</div>
+            </div>
+        </div>
+
+        <div class="stat-card animated-bg glow-on-hover filter-stat active" data-filter="pending">
+            <div class="stat-icon pending">
+                <svg width="28" height="28">
+                    <use href="{% static 'icons/icons.svg' %}#icon-clock"></use>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ pending_count }}</div>
+                <div class="stat-label">Menunggu Review</div>
+            </div>
+        </div>
+
+        <div class="stat-card animated-bg glow-on-hover filter-stat" data-filter="approved">
+            <div class="stat-icon approved">
+                <svg width="28" height="28">
+                    <use href="{% static 'icons/icons.svg' %}#icon-check"></use>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ approved_count }}</div>
+                <div class="stat-label">Disetujui</div>
+            </div>
+        </div>
+
+        <div class="stat-card animated-bg glow-on-hover filter-stat" data-filter="rejected">
+            <div class="stat-icon rejected">
+                <svg width="28" height="28">
+                    <use href="{% static 'icons/icons.svg' %}#icon-close"></use>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ rejected_count }}</div>
+                <div class="stat-label">Ditolak</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Requests Grid -->
+    <div class="requests-grid">
+        {% if voucher_requests %}
+            {% for request in voucher_requests %}
+            <div class="request-card" data-status="{{ request.status }}">
+                <div class="request-card-header">
+                    <div class="request-info">
+                        <h2 class="request-title">
+                            {{ request.voucher_name }}
+                            <span class="voucher-type-tag {{ request.voucher_type }}">
+                                <svg width="16" height="16">
+                                    <use href="{% static 'icons/icons.svg' %}#icon-voucher"></use>
+                                </svg>
+                                {{ request.get_voucher_type_display }}
+                            </span>
+                        </h2>
+                        <div class="laundry-info">
+                            <svg width="18" height="18">
+                                <use href="{% static 'icons/icons.svg' %}#icon-wash"></use>
+                            </svg>
+                            <strong>{{ request.laundry.name }}</strong> - {{ request.laundry.district }}
+                        </div>
+                        <div class="laundry-info">
+                            <svg width="18" height="18">
+                                <use href="{% static 'icons/icons.svg' %}#icon-user"></use>
+                            </svg>
+                            {{ request.requested_by.get_full_name }}
+                        </div>
+                    </div>
+                    <span class="status-badge {{ request.status }}">
+                        {{ request.get_status_display }}
+                    </span>
+                </div>
+
+                <div class="request-details-grid">
+                    <div class="detail-box">
+                        <div class="detail-label">
+                            <svg width="16" height="16">
+                                <use href="{% static 'icons/icons.svg' %}#icon-money"></use>
+                            </svg>
+                            Nilai Diskon
+                        </div>
+                        <div class="detail-value">
+                            {% if request.voucher_type == 'percentage_discount' %}
+                                {{ request.discount_value }}%
+                            {% elif request.voucher_type == 'fixed_discount' %}
+                                Rp {{ request.discount_value|floatformat:0 }}
+                            {% elif request.voucher_type == 'free_kg' %}
+                                {{ request.discount_value }} KG
+                            {% else %}
+                                Free Ongkir
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="detail-box">
+                        <div class="detail-label">
+                            <svg width="16" height="16">
+                                <use href="{% static 'icons/icons.svg' %}#icon-weight"></use>
+                            </svg>
+                            Min. Order
+                        </div>
+                        <div class="detail-value">{{ request.min_order_kg }} KG</div>
+                    </div>
+
+                    <div class="detail-box">
+                        <div class="detail-label">
+                            <svg width="16" height="16">
+                                <use href="{% static 'icons/icons.svg' %}#icon-package"></use>
+                            </svg>
+                            Total Kuota
+                        </div>
+                        <div class="detail-value">{{ request.total_quota }}x</div>
+                    </div>
+
+                    <div class="detail-box">
+                        <div class="detail-label">
+                            <svg width="16" height="16">
+                                <use href="{% static 'icons/icons.svg' %}#icon-calendar"></use>
+                            </svg>
+                            Durasi
+                        </div>
+                        <div class="detail-value">{{ request.duration_days }} hari</div>
+                    </div>
+                </div>
+
+                <div class="reason-box">
+                    <div class="reason-label">
+                        <svg width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-message"></use>
+                        </svg>
+                        Alasan Request
+                    </div>
+                    <div class="reason-text">{{ request.reason }}</div>
+                </div>
+
+                <div class="request-meta">
+                    <div class="meta-item">
+                        <svg width="16" height="16">
+                            <use href="{% static 'icons/icons.svg' %}#icon-calendar"></use>
+                        </svg>
+                        Dibuat: {{ request.created_at|date:"d M Y, H:i" }}
+                    </div>
+                    {% if request.reviewed_at %}
+                    <div class="meta-item">
+                        <svg width="16" height="16">
+                            <use href="{% static 'icons/icons.svg' %}#icon-user"></use>
+                        </svg>
+                        Review: {{ request.reviewed_at|date:"d M Y, H:i" }} oleh {{ request.reviewed_by.get_full_name }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="action-buttons">
+                    {% if request.status == 'pending' %}
+                        <button class="btn btn-approve" data-request-id="{{ request.id }}">
+                            <svg width="20" height="20">
+                                <use href="{% static 'icons/icons.svg' %}#icon-check"></use>
+                            </svg>
+                            Setujui
+                        </button>
+                        <button class="btn btn-reject" data-request-id="{{ request.id }}">
+                            <svg width="20" height="20">
+                                <use href="{% static 'icons/icons.svg' %}#icon-close"></use>
+                            </svg>
+                            Tolak
+                        </button>
+                    {% else %}
+                        <button class="btn btn-detail" disabled>
+                            <svg width="20" height="20">
+                                <use href="{% static 'icons/icons.svg' %}#icon-check"></use>
+                            </svg>
+                            {% if request.status == 'approved' %}Sudah Disetujui{% else %}Sudah Ditolak{% endif %}
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <svg class="empty-icon">
+                    <use href="{% static 'icons/icons.svg' %}#icon-voucher"></use>
+                </svg>
+                <h3 class="empty-title">Belum Ada Request Voucher</h3>
+                <p class="empty-text">Request voucher dari mitra akan muncul di sini</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal" id="rejectModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Tolak Request Voucher</h3>
+            <button class="modal-close" onclick="closeRejectModal()">
+                <svg width="20" height="20">
+                    <use href="{% static 'icons/icons.svg' %}#icon-close"></use>
+                </svg>
+            </button>
+        </div>
+        
+        <form id="rejectForm">
+            <div class="form-group">
+                <label class="form-label">Catatan Penolakan (Opsional)</label>
+                <textarea 
+                    class="form-textarea" 
+                    id="rejectNotes" 
+                    placeholder="Jelaskan alasan penolakan kepada mitra..."
+                ></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-detail" onclick="closeRejectModal()">
+                    Batal
+                </button>
+                <button type="submit" class="btn btn-reject">
+                    <svg width="20" height="20">
+                        <use href="{% static 'icons/icons.svg' %}#icon-close"></use>
+                    </svg>
+                    Tolak Request
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+const csrfToken = '{{ csrf_token }}';
+let currentRejectId = null;
+
+// Filter functionality
+document.querySelectorAll('.filter-stat').forEach(stat => {
+    stat.addEventListener('click', function() {
+        const filter = this.dataset.filter;
+        
+        // Update active state
+        document.querySelectorAll('.filter-stat').forEach(s => s.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Filter cards
+        document.querySelectorAll('.request-card').forEach(card => {
+            if (filter === 'all' || card.dataset.status === filter) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+});
+
+// Auto-filter to pending on load
+document.addEventListener('DOMContentLoaded', function() {
+    const pendingStat = document.querySelector('.filter-stat[data-filter="pending"]');
+    if (pendingStat) {
+        pendingStat.click();
+    }
+    
+    // Attach approve button listeners
+    document.querySelectorAll('.btn-approve').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const requestId = this.dataset.requestId;
+            approveRequest(requestId);
+        });
+    });
+    
+    // Attach reject button listeners
+    document.querySelectorAll('.btn-reject').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const requestId = this.dataset.requestId;
+            showRejectModal(requestId);
+        });
+    });
+});
+
+// Approve request
+function approveRequest(requestId) {
+    if (!confirm('Yakin ingin menyetujui voucher request ini?')) {
+        return;
+    }
+
+    fetch(`/partners/admin/vouchers/${requestId}/approve/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Voucher berhasil disetujui!\nKode: ' + data.voucher_code);
+            location.reload();
+        } else {
+            alert('Gagal menyetujui voucher: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat menyetujui voucher');
+    });
+}
+
+// Show reject modal
+function showRejectModal(requestId) {
+    currentRejectId = requestId;
+    document.getElementById('rejectModal').classList.add('active');
+    document.getElementById('rejectNotes').value = '';
+    document.getElementById('rejectNotes').focus();
+}
+
+// Close reject modal
+function closeRejectModal() {
+    document.getElementById('rejectModal').classList.remove('active');
+    currentRejectId = null;
+}
+
+// Handle reject form submit
+document.getElementById('rejectForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const notes = document.getElementById('rejectNotes').value;
+    
+    fetch(`/partners/admin/vouchers/${currentRejectId}/reject/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ notes: notes })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Voucher request berhasil ditolak');
+            location.reload();
+        } else {
+            alert('Gagal menolak voucher: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat menolak voucher');
+    });
+});
+
+// Close modal on ESC key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeRejectModal();
+    }
+});
+
+// Close modal on background click
+document.getElementById('rejectModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeRejectModal();
+    }
+});
+</script>
+{% endblock %}

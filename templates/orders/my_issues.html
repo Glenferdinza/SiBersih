@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Laporan Kendala Saya - SiBersih{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #F0FDFA 0%, #ECFEFF 100%);
+        min-height: 100vh;
+    }
+
+    .issues-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+    
+    .issues-header {
+        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        color: white;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .issues-header h1 {
+        font-size: 2rem;
+        margin: 0;
+    }
+    
+    .btn-new {
+        background: white;
+        color: #0D9488;
+        padding: 0.875rem 1.5rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-new:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .issue-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .issue-card:hover {
+        box-shadow: 0 6px 30px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    
+    .issue-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #F1F5F9;
+    }
+    
+    .ticket-number {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0D9488;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    
+    .status-open {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+    
+    .status-in_progress {
+        background: #DBEAFE;
+        color: #1E40AF;
+    }
+    
+    .status-resolved {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+    
+    .status-closed {
+        background: #F1F5F9;
+        color: #64748B;
+    }
+    
+    .issue-subject {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1E293B;
+        margin-bottom: 0.5rem;
+    }
+    
+    .issue-meta {
+        display: flex;
+        gap: 2rem;
+        color: #64748B;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .issue-description {
+        color: #475569;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+    
+    .admin-response-section {
+        background: #F0FDFA;
+        border-left: 4px solid #14B8A6;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-top: 1rem;
+    }
+    
+    .response-header {
+        color: #0F766E;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .response-text {
+        color: #334155;
+        line-height: 1.6;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 20px;
+    }
+    
+    .empty-state-icon {
+        font-size: 5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state h2 {
+        color: #334155;
+        margin-bottom: 0.5rem;
+    }
+    
+    .empty-state p {
+        color: #64748B;
+        margin-bottom: 2rem;
+    }
+</style>
+
+<div class="issues-container">
+    <div class="issues-header">
+        <h1>📋 Laporan Kendala Saya</h1>
+        <a href="{% url 'orders:report_payment_issue' %}" class="btn-new">➕ Lapor Kendala Baru</a>
+    </div>
+    
+    {% if issues %}
+        {% for issue in issues %}
+        <div class="issue-card">
+            <div class="issue-header">
+                <div class="ticket-number">{{ issue.ticket_number }}</div>
+                <span class="status-badge status-{{ issue.status }}">{{ issue.get_status_display }}</span>
+            </div>
+            
+            <div class="issue-subject">{{ issue.subject }}</div>
+            
+            <div class="issue-meta">
+                <span>🏷️ {{ issue.get_issue_type_display }}</span>
+                <span>📅 {{ issue.created_at|date:"d M Y H:i" }}</span>
+                {% if issue.order %}
+                <span>📦 {{ issue.order.order_number }}</span>
+                {% endif %}
+            </div>
+            
+            <div class="issue-description">
+                {{ issue.description }}
+            </div>
+            
+            {% if issue.screenshot %}
+            <div style="margin-bottom: 1rem;">
+                <a href="{{ issue.screenshot.url }}" target="_blank" style="color: #0D9488;">
+                    📎 Lihat Screenshot
+                </a>
+            </div>
+            {% endif %}
+            
+            {% if issue.admin_response %}
+            <div class="admin-response-section">
+                <div class="response-header">
+                    <span>💬 Tanggapan dari Admin</span>
+                    <span style="font-weight: normal; font-size: 0.85rem; color: #64748B;">
+                        ({{ issue.responded_at|date:"d M Y H:i" }})
+                    </span>
+                </div>
+                <div class="response-text">{{ issue.admin_response }}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <h2>Belum ada laporan kendala</h2>
+            <p>Anda belum pernah melaporkan kendala pembayaran</p>
+            <a href="{% url 'orders:report_payment_issue' %}" class="btn-new">Lapor Kendala Baru</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

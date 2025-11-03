@@ -1,0 +1,397 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pendapatan Saya - SiBersih{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #F0FDFA 0%, #ECFEFF 100%);
+        min-height: 100vh;
+    }
+
+    .earnings-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+    
+    .earnings-header {
+        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        color: white;
+        margin-bottom: 2rem;
+    }
+    
+    .earnings-header h1 {
+        font-size: 2rem;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-label {
+        color: #64748B;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #0F766E;
+    }
+    
+    .stat-card.pending {
+        border-left: 4px solid #F59E0B;
+    }
+    
+    .stat-card.processing {
+        border-left: 4px solid #3B82F6;
+    }
+    
+    .stat-card.completed {
+        border-left: 4px solid #10B981;
+    }
+    
+    .tabs-container {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .tab {
+        padding: 1rem 2rem;
+        background: white;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #64748B;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .tab:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .tab.active {
+        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        color: white;
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    .transactions-table {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        overflow-x: auto;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    thead {
+        background: #F8FAFC;
+    }
+    
+    th {
+        padding: 1rem;
+        text-align: left;
+        color: #334155;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    td {
+        padding: 1rem;
+        border-bottom: 1px solid #F1F5F9;
+        color: #64748B;
+    }
+    
+    tr:hover {
+        background: #F8FAFC;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.4rem 0.875rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    
+    .status-pending {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+    
+    .status-processing {
+        background: #DBEAFE;
+        color: #1E40AF;
+    }
+    
+    .status-completed {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+    
+    .amount {
+        font-weight: 700;
+        color: #0F766E;
+        font-size: 1.1rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #94A3B8;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+    
+    .bank-info {
+        background: #F0FDFA;
+        border-left: 4px solid #14B8A6;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+    
+    .bank-info h3 {
+        color: #0F766E;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+    
+    .bank-detail {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        color: #334155;
+    }
+    
+    @media (max-width: 968px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="earnings-container">
+    <div class="earnings-header">
+        <h1>💰 Pendapatan Saya</h1>
+        <p>Pantau pendapatan dan transfer dari pesanan laundry</p>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card pending">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-label">Menunggu Transfer</div>
+            <div class="stat-value">Rp {{ total_pending|floatformat:0 }}</div>
+        </div>
+        
+        <div class="stat-card processing">
+            <div class="stat-icon">🔄</div>
+            <div class="stat-label">Sedang Diproses</div>
+            <div class="stat-value">Rp {{ total_processing|floatformat:0 }}</div>
+        </div>
+        
+        <div class="stat-card completed">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">Total Diterima</div>
+            <div class="stat-value">Rp {{ total_earnings|floatformat:0 }}</div>
+        </div>
+    </div>
+    
+    <!-- Bank Account Info -->
+    {% if request.user.mitra_verification %}
+    <div class="bank-info">
+        <h3>🏦 Informasi Rekening Penerima</h3>
+        <div class="bank-detail">
+            <span>Bank:</span>
+            <strong>{{ request.user.mitra_verification.get_bank_name_display }}</strong>
+        </div>
+        <div class="bank-detail">
+            <span>Nomor Rekening:</span>
+            <strong>{{ request.user.mitra_verification.bank_account_number }}</strong>
+        </div>
+        <div class="bank-detail">
+            <span>Atas Nama:</span>
+            <strong>{{ request.user.mitra_verification.bank_account_name }}</strong>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Tabs -->
+    <div class="tabs-container">
+        <div class="tab active" onclick="switchTab('pending')">
+            ⏳ Pending ({{ pending_transactions.count }})
+        </div>
+        <div class="tab" onclick="switchTab('processing')">
+            🔄 Processing ({{ processing_transactions.count }})
+        </div>
+        <div class="tab" onclick="switchTab('completed')">
+            ✅ Completed ({{ completed_transactions.count }})
+        </div>
+    </div>
+    
+    <!-- Pending Transactions -->
+    <div class="tab-content active" id="pending-content">
+        <div class="transactions-table">
+            {% if pending_transactions %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>No. Order</th>
+                        <th>Tanggal</th>
+                        <th>Total Pembayaran</th>
+                        <th>Fee Platform</th>
+                        <th>Pendapatan Mitra</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in pending_transactions %}
+                    <tr>
+                        <td><strong>{{ transaction.order.order_number }}</strong></td>
+                        <td>{{ transaction.created_at|date:"d M Y H:i" }}</td>
+                        <td>Rp {{ transaction.gross_amount|floatformat:0 }}</td>
+                        <td>Rp {{ transaction.platform_fee|floatformat:0 }}</td>
+                        <td class="amount">Rp {{ transaction.mitra_earning|floatformat:0 }}</td>
+                        <td><span class="status-badge status-{{ transaction.status }}">{{ transaction.get_status_display }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h3>Tidak ada transaksi pending</h3>
+                <p>Transfer akan muncul di sini setelah pembayaran pelanggan diverifikasi</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Processing Transactions -->
+    <div class="tab-content" id="processing-content">
+        <div class="transactions-table">
+            {% if processing_transactions %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>No. Order</th>
+                        <th>Pendapatan</th>
+                        <th>Diproses</th>
+                        <th>Ref. Transfer</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in processing_transactions %}
+                    <tr>
+                        <td><strong>{{ transaction.order.order_number }}</strong></td>
+                        <td class="amount">Rp {{ transaction.mitra_earning|floatformat:0 }}</td>
+                        <td>{{ transaction.processed_at|date:"d M Y H:i" }}</td>
+                        <td>{{ transaction.transfer_reference|default:"-" }}</td>
+                        <td><span class="status-badge status-{{ transaction.status }}">{{ transaction.get_status_display }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h3>Tidak ada transaksi yang sedang diproses</h3>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Completed Transactions -->
+    <div class="tab-content" id="completed-content">
+        <div class="transactions-table">
+            {% if completed_transactions %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>No. Order</th>
+                        <th>Pendapatan</th>
+                        <th>Selesai</th>
+                        <th>Ref. Transfer</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in completed_transactions %}
+                    <tr>
+                        <td><strong>{{ transaction.order.order_number }}</strong></td>
+                        <td class="amount">Rp {{ transaction.mitra_earning|floatformat:0 }}</td>
+                        <td>{{ transaction.completed_at|date:"d M Y H:i" }}</td>
+                        <td>{{ transaction.transfer_reference|default:"-" }}</td>
+                        <td><span class="status-badge status-{{ transaction.status }}">{{ transaction.get_status_display }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h3>Belum ada transaksi selesai</h3>
+                <p>Riwayat transfer yang sudah selesai akan muncul di sini</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(tabName) {
+        // Update tab buttons
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        // Update tab content
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.getElementById(tabName + '-content').classList.add('active');
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,905 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pengaturan - SiBersih{% endblock %}
+
+{% block navbar %}
+    {% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/animations.css' %}">
+<style>
+    body {
+        background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+        min-height: 100vh;
+    }
+
+    .settings-page-wrapper {
+        padding: 100px 20px 40px;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .settings-header {
+        background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 20px 20px 0 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .settings-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .settings-header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .settings-header h1 {
+        margin: 0 0 10px 0;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .settings-header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+
+    .settings-card {
+        background: white;
+        border-radius: 0 0 20px 20px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+
+    .settings-section {
+        margin-bottom: 40px;
+    }
+
+    .settings-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-bottom: 15px;
+        border-bottom: 3px solid #f1f5f9;
+    }
+
+    .section-title svg {
+        width: 28px;
+        height: 28px;
+        fill: #14b8a6;
+    }
+
+    .role-info-box {
+        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+        border: 2px solid #a7f3d0;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+
+    .current-role {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+
+    .current-role-label {
+        font-weight: 600;
+        color: #065f46;
+        font-size: 1rem;
+    }
+
+    .role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .role-badge.user {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    .role-badge.mitra {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+
+    .role-badge.admin {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .role-badge svg {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+    }
+
+    .role-description {
+        color: #047857;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .mitra-application-status {
+        margin-bottom: 25px;
+    }
+
+    .status-box {
+        border-radius: 15px;
+        padding: 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        border: 2px solid;
+    }
+
+    .status-box.status-pending {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-color: #fbbf24;
+    }
+
+    .status-box.status-approved {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        border-color: #10b981;
+    }
+
+    .status-box.status-rejected {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border-color: #ef4444;
+    }
+
+    .status-icon {
+        width: 32px;
+        height: 32px;
+        flex-shrink: 0;
+    }
+
+    .status-box.status-pending .status-icon {
+        fill: #f59e0b;
+    }
+
+    .status-box.status-approved .status-icon {
+        fill: #059669;
+    }
+
+    .status-box.status-rejected .status-icon {
+        fill: #dc2626;
+    }
+
+    .status-content {
+        flex-grow: 1;
+    }
+
+    .status-content strong {
+        display: block;
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+
+    .status-box.status-pending .status-content strong {
+        color: #92400e;
+    }
+
+    .status-box.status-approved .status-content strong {
+        color: #065f46;
+    }
+
+    .status-box.status-rejected .status-content strong {
+        color: #991b1b;
+    }
+
+    .status-content p {
+        margin: 0 0 8px 0;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .status-box.status-pending .status-content p {
+        color: #78350f;
+    }
+
+    .status-box.status-approved .status-content p {
+        color: #047857;
+    }
+
+    .status-box.status-rejected .status-content p {
+        color: #b91c1c;
+    }
+
+    .status-content small {
+        color: rgba(0, 0, 0, 0.6);
+        font-size: 0.8rem;
+    }
+
+    .role-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 25px;
+    }
+
+    .role-option {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .role-option.role-disabled {
+        cursor: not-allowed;
+    }
+
+    .role-option.role-disabled .role-option-card {
+        opacity: 0.6;
+        background: #f1f5f9;
+    }
+
+    .role-option.role-disabled:hover .role-option-card {
+        transform: none;
+        box-shadow: none;
+        border-color: #e2e8f0;
+    }
+
+    .role-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .role-option-card {
+        background: #f8fafc;
+        border: 3px solid #e2e8f0;
+        border-radius: 15px;
+        padding: 25px;
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .role-option input[type="radio"]:checked + .role-option-card {
+        border-color: #14b8a6;
+        background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+        box-shadow: 0 8px 25px rgba(20, 184, 166, 0.2);
+        transform: translateY(-4px);
+    }
+
+    .role-option-card:hover {
+        border-color: #14b8a6;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(20, 184, 166, 0.15);
+    }
+
+    .role-option-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+    }
+
+    .role-option-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .role-option-icon.user {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    }
+
+    .role-option-icon.mitra {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    }
+
+    .role-option-icon svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    .role-option-icon.user svg {
+        fill: #2563eb;
+    }
+
+    .role-option-icon.mitra svg {
+        fill: #d97706;
+    }
+
+    .role-option-title {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: #0f172a;
+    }
+
+    .role-option-description {
+        color: #64748b;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        flex-grow: 1;
+    }
+
+    .role-option-features {
+        margin-top: 10px;
+        padding-top: 15px;
+        border-top: 2px dashed #e2e8f0;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-size: 0.85rem;
+        color: #475569;
+    }
+
+    .feature-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .feature-item svg {
+        width: 16px;
+        height: 16px;
+        fill: #14b8a6;
+        flex-shrink: 0;
+    }
+
+    .role-requirement-notice {
+        margin-top: 12px;
+        padding: 10px 12px;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #1e40af;
+    }
+
+    .role-requirement-notice.pending {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #92400e;
+    }
+
+    .role-requirement-notice.rejected {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #991b1b;
+    }
+
+    .role-requirement-notice svg {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+    }
+
+    .admin-lock-notice {
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        border: 2px solid #fecaca;
+        border-radius: 15px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-top: 25px;
+    }
+
+    .admin-lock-notice svg {
+        width: 32px;
+        height: 32px;
+        fill: #dc2626;
+        flex-shrink: 0;
+    }
+
+    .admin-lock-notice-text {
+        flex-grow: 1;
+    }
+
+    .admin-lock-notice-text strong {
+        display: block;
+        color: #991b1b;
+        font-size: 1rem;
+        margin-bottom: 5px;
+    }
+
+    .admin-lock-notice-text p {
+        margin: 0;
+        color: #b91c1c;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 35px;
+        padding-top: 30px;
+        border-top: 2px dashed #e5e7eb;
+    }
+
+    .btn-save {
+        flex: 1;
+        background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        color: white;
+        border: none;
+        padding: 16px;
+        border-radius: 12px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4);
+    }
+
+    .btn-save:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(20, 184, 166, 0.6);
+    }
+
+    .btn-save:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-save svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .btn-cancel {
+        background: #f3f4f6;
+        color: #374151;
+        border: none;
+        padding: 16px 32px;
+        border-radius: 12px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        background: #e5e7eb;
+    }
+
+    .bubble-decorator {
+        position: fixed;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .bubble-1 {
+        width: 300px;
+        height: 300px;
+        top: -100px;
+        right: -100px;
+        animation: float 15s infinite ease-in-out;
+    }
+
+    .bubble-2 {
+        width: 200px;
+        height: 200px;
+        bottom: -50px;
+        left: -50px;
+        animation: float 20s infinite ease-in-out reverse;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(30px, -30px); }
+    }
+
+    @media (max-width: 768px) {
+        .settings-page-wrapper {
+            padding: 80px 15px 30px;
+        }
+
+        .settings-header {
+            padding: 30px 20px;
+        }
+
+        .settings-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .settings-card {
+            padding: 25px 20px;
+        }
+
+        .role-options {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn-cancel {
+            padding: 16px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include 'components/floating_icons.html' %}
+
+<div class="bubble-decorator bubble-1"></div>
+<div class="bubble-decorator bubble-2"></div>
+
+<div class="settings-page-wrapper">
+    <div class="settings-header animated-bg">
+        <div class="settings-header-content">
+            <h1>
+                <svg width="32" height="32">
+                    <use href="{% static 'icons/icons.svg' %}#icon-settings"></use>
+                </svg>
+                Pengaturan Akun
+            </h1>
+            <p>Kelola preferensi dan role akun Anda</p>
+        </div>
+    </div>
+
+    <div class="settings-card">
+        <form method="post" id="settingsForm" 
+              data-current-role="{{ user.role }}"
+              data-mitra-status="{{ mitra_request.status|default:'' }}"
+              data-has-mitra-request="{% if mitra_request %}true{% else %}false{% endif %}"
+              data-apply-url="{% url 'partners:apply_mitra' %}">
+            {% csrf_token %}
+            
+            <!-- Role Settings Section -->
+            <div class="settings-section">
+                <h2 class="section-title">
+                    <svg>
+                        <use href="{% static 'icons/icons.svg' %}#icon-shield"></use>
+                    </svg>
+                    Role Pengguna
+                </h2>
+
+                <div class="role-info-box">
+                    <div class="current-role">
+                        <span class="current-role-label">Role Saat Ini:</span>
+                        <span class="role-badge {{ user.role }}">
+                            <svg>
+                                {% if user.role == 'user' %}
+                                <use href="{% static 'icons/icons.svg' %}#icon-user"></use>
+                                {% elif user.role == 'mitra' %}
+                                <use href="{% static 'icons/icons.svg' %}#icon-briefcase"></use>
+                                {% elif user.role == 'admin' %}
+                                <use href="{% static 'icons/icons.svg' %}#icon-shield"></use>
+                                {% endif %}
+                            </svg>
+                            {{ user.role|title }}
+                        </span>
+                    </div>
+                    <p class="role-description">
+                        Pilih role yang sesuai dengan kebutuhan Anda. Setiap role memiliki fitur dan hak akses yang berbeda.
+                    </p>
+                </div>
+
+                {% if user.role == 'admin' %}
+                <div class="admin-lock-notice">
+                    <svg>
+                        <use href="{% static 'icons/icons.svg' %}#icon-lock"></use>
+                    </svg>
+                    <div class="admin-lock-notice-text">
+                        <strong>Role Admin Tidak Dapat Diubah</strong>
+                        <p>Untuk keamanan sistem, role Administrator tidak dapat diubah melalui pengaturan ini. Hubungi sistem administrator jika diperlukan perubahan.</p>
+                    </div>
+                </div>
+                {% else %}
+                
+                <!-- Status Aplikasi Mitra (jika user ingin jadi mitra) -->
+                {% if user.role == 'user' and mitra_request %}
+                <div class="mitra-application-status">
+                    {% if mitra_request.status == 'pending' %}
+                    <div class="status-box status-pending">
+                        <svg class="status-icon">
+                            <use href="{% static 'icons/icons.svg' %}#icon-clock"></use>
+                        </svg>
+                        <div class="status-content">
+                            <strong>Aplikasi Mitra Sedang Diproses</strong>
+                            <p>Permohonan Anda untuk menjadi mitra sedang dalam tahap peninjauan oleh admin. Mohon menunggu persetujuan.</p>
+                            <small>Diajukan pada: {{ mitra_request.created_at|date:"d M Y, H:i" }}</small>
+                        </div>
+                    </div>
+                    {% elif mitra_request.status == 'approved' %}
+                    <div class="status-box status-approved">
+                        <svg class="status-icon">
+                            <use href="{% static 'icons/icons.svg' %}#icon-check-circle"></use>
+                        </svg>
+                        <div class="status-content">
+                            <strong>Selamat! Aplikasi Mitra Disetujui</strong>
+                            <p>Permohonan Anda telah disetujui. Silakan pilih role "Mitra" di bawah untuk mengaktifkan akses mitra Anda.</p>
+                            <small>Disetujui pada: {{ mitra_request.updated_at|date:"d M Y, H:i" }}</small>
+                        </div>
+                    </div>
+                    {% elif mitra_request.status == 'rejected' %}
+                    <div class="status-box status-rejected">
+                        <svg class="status-icon">
+                            <use href="{% static 'icons/icons.svg' %}#icon-x-circle"></use>
+                        </svg>
+                        <div class="status-content">
+                            <strong>Aplikasi Mitra Ditolak</strong>
+                            <p>Mohon maaf, permohonan Anda untuk menjadi mitra tidak dapat disetujui saat ini. Anda dapat mengajukan permohonan baru.</p>
+                            <small>Ditolak pada: {{ mitra_request.updated_at|date:"d M Y, H:i" }}</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="role-options">
+                    <!-- User Role Option -->
+                    <label class="role-option">
+                        <input type="radio" name="role" value="user" {% if user.role == 'user' %}checked{% endif %} required>
+                        <div class="role-option-card">
+                            <div class="role-option-header">
+                                <div class="role-option-icon user">
+                                    <svg>
+                                        <use href="{% static 'icons/icons.svg' %}#icon-user"></use>
+                                    </svg>
+                                </div>
+                                <h3 class="role-option-title">User</h3>
+                            </div>
+                            <p class="role-option-description">
+                                Sebagai pengguna layanan laundry. Cocok untuk Anda yang ingin menggunakan jasa laundry.
+                            </p>
+                            <div class="role-option-features">
+                                <div class="feature-item">
+                                    <svg><use href="{% static 'icons/icons.svg' %}#icon-check"></use></svg>
+                                    <span>Pesan layanan laundry</span>
+                                </div>
+                                <div class="feature-item">
+                                    <svg><use href="{% static 'icons/icons.svg' %}#icon-check"></use></svg>
+                                    <span>Lacak status pesanan</span>
+                                </div>
+                                <div class="feature-item">
+                                    <svg><use href="{% static 'icons/icons.svg' %}#icon-check"></use></svg>
+                                    <span>Kelola riwayat laundry</span>
+                                </div>
+                                <div class="feature-item">
+                                    <svg><use href="{% static 'icons/icons.svg' %}#icon-check"></use></svg>
+                                    <span>Gunakan voucher diskon</span>
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+
+                    <!-- Mitra Role Option -->
+                    <label class="role-option {% if user.role == 'user' and mitra_request.status != 'approved' %}role-disabled{% endif %}">
+                        {% if user.role == 'user' %}
+                            {% if mitra_request.status == 'approved' %}
+                                <input type="radio" name="role" value="mitra" required>
+                            {% else %}
+                                <input type="radio" name="role" value="mitra" disabled>
+                            {% endif %}
+                        {% else %}
+                            <input type="radio" name="role" value="mitra" {% if user.role == 'mitra' %}checked{% endif %} required>
+                        {% endif %}
+                        <div class="role-option-card">
+                            <div class="role-option-header">
+                                <div class="role-option-icon mitra">
+                                    <svg>
+                                        <use href="{% static 'icons/icons.svg' %}#icon-briefcase"></use>
+                                    </svg>
+                                </div>
+                                <h3 class="role-option-title">Mitra</h3>
+                            </div>
+                            <p class="role-option-description">
+                                Sebagai penyedia layanan laundry. Cocok untuk pemilik atau pengelola usaha laundry.
+                            </p>
+                            <div class="role-option-features">
+                                <div class="feature-item">
+                                    <svg><use href="{% static 'icons/icons.svg' %}#icon-check"></use></svg>
+                                    <span>Kelola usaha laundry</span>
+                                </div>
+                                <div class="feature-item">
+                                    <svg><use href="{% static 'icons/icons.svg' %}#icon-check"></use></svg>
+                                    <span>Terima pesanan pelanggan</span>
+                                </div>
+                                <div class="feature-item">
+                                    <svg><use href="{% static 'icons/icons.svg' %}#icon-check"></use></svg>
+                                    <span>Atur harga & layanan</span>
+                                </div>
+                                <div class="feature-item">
+                                    <svg><use href="{% static 'icons/icons.svg' %}#icon-check"></use></svg>
+                                    <span>Lihat statistik pendapatan</span>
+                                </div>
+                            </div>
+                            {% if user.role == 'user' and not mitra_request %}
+                            <div class="role-requirement-notice">
+                                <svg><use href="{% static 'icons/icons.svg' %}#icon-info"></use></svg>
+                                <span>Klik untuk mendaftar sebagai mitra</span>
+                            </div>
+                            {% elif user.role == 'user' and mitra_request.status == 'pending' %}
+                            <div class="role-requirement-notice pending">
+                                <svg><use href="{% static 'icons/icons.svg' %}#icon-clock"></use></svg>
+                                <span>Menunggu persetujuan admin</span>
+                            </div>
+                            {% elif user.role == 'user' and mitra_request.status == 'rejected' %}
+                            <div class="role-requirement-notice rejected">
+                                <svg><use href="{% static 'icons/icons.svg' %}#icon-x-circle"></use></svg>
+                                <span>Aplikasi ditolak - Ajukan ulang</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </label>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Form Actions -->
+            {% if user.role != 'admin' %}
+            <div class="form-actions">
+                <button type="submit" class="btn-save" id="saveButton">
+                    <svg><use href="{% static 'icons/icons.svg' %}#icon-check"></use></svg>
+                    Simpan Perubahan
+                </button>
+                <button type="button" class="btn-cancel" onclick="window.history.back()">Batal</button>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    const form = document.getElementById('settingsForm');
+    if (!form) return;
+
+    const saveButton = document.getElementById('saveButton');
+    const radioButtons = document.querySelectorAll('input[name="role"]');
+    
+    // Data dari form data attributes
+    const currentRole = form.dataset.currentRole;
+    const mitraRequestStatus = form.dataset.mitraStatus;
+    const hasMitraRequest = form.dataset.hasMitraRequest === 'true';
+    const applyMitraUrl = form.dataset.applyUrl;
+
+    // Handle klik pada card mitra yang belum approved
+    const mitraOption = document.querySelector('.role-option input[name="role"][value="mitra"]');
+    if (mitraOption && mitraOption.disabled) {
+        const mitraCard = mitraOption.closest('.role-option');
+        if (mitraCard) {
+            mitraCard.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (currentRole === 'user') {
+                    if (!hasMitraRequest) {
+                        // Belum pernah apply
+                        if (confirm('Anda akan diarahkan ke halaman pendaftaran mitra. Lanjutkan?')) {
+                            window.location.href = applyMitraUrl;
+                        }
+                    } else if (mitraRequestStatus === 'pending') {
+                        // Sedang pending
+                        alert('Permohonan mitra Anda sedang dalam proses peninjauan. Mohon menunggu persetujuan dari admin.');
+                    } else if (mitraRequestStatus === 'rejected') {
+                        // Ditolak
+                        if (confirm('Aplikasi mitra Anda sebelumnya ditolak. Apakah Anda ingin mengajukan permohonan baru?')) {
+                            window.location.href = applyMitraUrl;
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // Check if role changed
+    function checkRoleChange() {
+        if (!saveButton) return;
+        
+        const selectedRole = document.querySelector('input[name="role"]:checked');
+        if (selectedRole && selectedRole.value !== currentRole && !selectedRole.disabled) {
+            saveButton.disabled = false;
+        } else {
+            saveButton.disabled = true;
+        }
+    }
+
+    // Add change listeners to radio buttons
+    radioButtons.forEach(radio => {
+        radio.addEventListener('change', checkRoleChange);
+    });
+
+    // Initial check
+    checkRoleChange();
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        const selectedRole = document.querySelector('input[name="role"]:checked');
+        
+        if (!selectedRole) {
+            e.preventDefault();
+            alert('Silakan pilih role terlebih dahulu');
+            return;
+        }
+
+        if (selectedRole.disabled) {
+            e.preventDefault();
+            alert('Role ini tidak dapat dipilih. Silakan lengkapi persyaratan terlebih dahulu.');
+            return;
+        }
+
+        if (selectedRole.value === currentRole) {
+            e.preventDefault();
+            alert('Role yang dipilih sama dengan role saat ini');
+            return;
+        }
+
+        // Confirm role change
+        const roleNames = {
+            'user': 'User',
+            'mitra': 'Mitra'
+        };
+        
+        let confirmMsg = '';
+        
+        if (selectedRole.value === 'user' && currentRole === 'mitra') {
+            confirmMsg = 'Apakah Anda yakin ingin mengubah role dari Mitra ke User?\n\nAnda akan kehilangan akses ke fitur mitra dan tidak dapat menerima pesanan.';
+        } else {
+            confirmMsg = `Apakah Anda yakin ingin mengubah role dari ${roleNames[currentRole] || currentRole} ke ${roleNames[selectedRole.value] || selectedRole.value}?\n\nAnda akan diarahkan ke dashboard yang sesuai dengan role baru Anda.`;
+        }
+        
+        if (!confirm(confirmMsg)) {
+            e.preventDefault();
+        }
+    });
+})();
+</script>
+{% endblock %}

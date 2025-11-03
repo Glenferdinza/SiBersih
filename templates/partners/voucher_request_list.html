@@ -1,0 +1,495 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load voucher_filters %}
+
+{% block title %}Daftar Request Voucher - SiBersih{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/animations.css' %}">
+<style>
+    body {
+        background: linear-gradient(135deg, #F0FDFA 0%, #ECFEFF 100%);
+        min-height: 100vh;
+    }
+
+    .voucher-list-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .page-title h1 {
+        font-size: 2.5rem;
+        color: #0F172A;
+        margin: 0;
+    }
+
+    .page-title svg {
+        color: var(--primary-teal);
+    }
+
+    .btn-create {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.875rem 1.75rem;
+        background: linear-gradient(135deg, var(--primary-teal), var(--accent-emerald));
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(20, 184, 166, 0.3);
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-box {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .stat-icon.pending { background: linear-gradient(135deg, #FEF3C7, #FDE047); color: #92400E; }
+    .stat-icon.approved { background: linear-gradient(135deg, #D1FAE5, #6EE7B7); color: #065F46; }
+    .stat-icon.rejected { background: linear-gradient(135deg, #FEE2E2, #FCA5A5); color: #991B1B; }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #0F172A;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: #64748B;
+        font-weight: 500;
+    }
+
+    .voucher-requests-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-state svg {
+        width: 120px;
+        height: 120px;
+        color: #CBD5E1;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        color: #475569;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: #94A3B8;
+        margin-bottom: 2rem;
+    }
+
+    .request-item {
+        background: linear-gradient(135deg, #F8FAFC 0%, white 100%);
+        border: 2px solid #E2E8F0;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .request-item:hover {
+        border-color: var(--primary-teal);
+        box-shadow: 0 8px 24px rgba(20, 184, 166, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .request-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1rem;
+    }
+
+    .request-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .request-title h3 {
+        font-size: 1.25rem;
+        color: #1E293B;
+        margin: 0;
+    }
+
+    .voucher-type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.375rem 0.875rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .voucher-type-badge.free-shipping {
+        background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
+        color: #1E40AF;
+    }
+
+    .voucher-type-badge.percentage {
+        background: linear-gradient(135deg, #FEF3C7, #FDE047);
+        color: #92400E;
+    }
+
+    .voucher-type-badge.fixed {
+        background: linear-gradient(135deg, #D1FAE5, #6EE7B7);
+        color: #065F46;
+    }
+
+    .voucher-type-badge.free-kg {
+        background: linear-gradient(135deg, #E0E7FF, #C7D2FE);
+        color: #3730A3;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-badge.pending {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+
+    .status-badge.approved {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
+    .status-badge.rejected {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .request-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #64748B;
+        font-size: 0.9rem;
+    }
+
+    .detail-item svg {
+        color: var(--primary-teal);
+        flex-shrink: 0;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .request-meta {
+        display: flex;
+        gap: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #E2E8F0;
+        font-size: 0.875rem;
+        color: #94A3B8;
+    }
+
+    .voucher-code-box {
+        background: linear-gradient(135deg, #0D9488, #14B8A6);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        margin-top: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .voucher-code-box .code {
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+    }
+
+    .admin-notes {
+        background: #FEF3C7;
+        border-left: 4px solid #F59E0B;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+
+    .admin-notes-title {
+        font-weight: 700;
+        color: #92400E;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .admin-notes-content {
+        color: #78350F;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .request-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="voucher-list-container">
+    <div class="page-header">
+        <div class="page-title">
+            <svg width="40" height="40">
+                <use href="{% static 'icons/icons.svg' %}#icon-voucher"></use>
+            </svg>
+            <h1>Voucher Requests</h1>
+        </div>
+        <a href="{% url 'partners:create_voucher_request' %}" class="btn-create">
+            <svg width="20" height="20">
+                <use href="{% static 'icons/icons.svg' %}#icon-voucher"></use>
+            </svg>
+            Request Voucher Baru
+        </a>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-box animated-bg glow-on-hover">
+            <div class="stat-icon pending">
+                <svg width="24" height="24">
+                    <use href="{% static 'icons/icons.svg' %}#icon-clock"></use>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ voucher_requests|filter_status:'pending'|length }}</div>
+                <div class="stat-label">Menunggu Review</div>
+            </div>
+        </div>
+
+        <div class="stat-box animated-bg glow-on-hover">
+            <div class="stat-icon approved">
+                <svg width="24" height="24">
+                    <use href="{% static 'icons/icons.svg' %}#icon-check"></use>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ voucher_requests|filter_status:'approved'|length }}</div>
+                <div class="stat-label">Disetujui</div>
+            </div>
+        </div>
+
+        <div class="stat-box animated-bg glow-on-hover">
+            <div class="stat-icon rejected">
+                <svg width="24" height="24">
+                    <use href="{% static 'icons/icons.svg' %}#icon-close"></use>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ voucher_requests|filter_status:'rejected'|length }}</div>
+                <div class="stat-label">Ditolak</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="voucher-requests-card animated-bg">
+        {% if voucher_requests %}
+            {% for request in voucher_requests %}
+            <div class="request-item">
+                <div class="request-header">
+                    <div class="request-title">
+                        <h3>{{ request.voucher_name }}</h3>
+                        <span class="voucher-type-badge {% if request.voucher_type == 'free_shipping' %}free-shipping{% elif request.voucher_type == 'percentage_discount' %}percentage{% elif request.voucher_type == 'fixed_discount' %}fixed{% else %}free-kg{% endif %}">
+                            <svg width="16" height="16">
+                                <use href="{% static 'icons/icons.svg' %}#icon-voucher"></use>
+                            </svg>
+                            {{ request.get_voucher_type_display }}
+                        </span>
+                    </div>
+                    <span class="status-badge {{ request.status }}">
+                        {{ request.get_status_display }}
+                    </span>
+                </div>
+
+                <div class="request-details">
+                    <div class="detail-item">
+                        <svg width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-wash"></use>
+                        </svg>
+                        <span><span class="detail-label">Laundry:</span> {{ request.laundry.name }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <svg width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-money"></use>
+                        </svg>
+                        <span><span class="detail-label">Nilai:</span> 
+                        {% if request.voucher_type == 'percentage_discount' %}
+                            {{ request.discount_value }}%
+                        {% elif request.voucher_type == 'fixed_discount' %}
+                            Rp {{ request.discount_value|floatformat:0 }}
+                        {% elif request.voucher_type == 'free_kg' %}
+                            {{ request.discount_value }} KG
+                        {% else %}
+                            Free Ongkir
+                        {% endif %}
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <svg width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-weight"></use>
+                        </svg>
+                        <span><span class="detail-label">Min Order:</span> {{ request.min_order_kg }} KG</span>
+                    </div>
+                    <div class="detail-item">
+                        <svg width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-package"></use>
+                        </svg>
+                        <span><span class="detail-label">Kuota:</span> {{ request.total_quota }}x</span>
+                    </div>
+                    <div class="detail-item">
+                        <svg width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-calendar"></use>
+                        </svg>
+                        <span><span class="detail-label">Durasi:</span> {{ request.duration_days }} hari</span>
+                    </div>
+                </div>
+
+                {% if request.status == 'approved' and request.created_voucher %}
+                <div class="voucher-code-box">
+                    <div>
+                        <div style="font-size: 0.875rem; opacity: 0.9;">Kode Voucher:</div>
+                        <div class="code">{{ request.created_voucher.code }}</div>
+                    </div>
+                    <svg width="32" height="32">
+                        <use href="{% static 'icons/icons.svg' %}#icon-check"></use>
+                    </svg>
+                </div>
+                {% endif %}
+
+                {% if request.admin_notes %}
+                <div class="admin-notes">
+                    <div class="admin-notes-title">
+                        <svg width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-message"></use>
+                        </svg>
+                        Catatan Admin
+                    </div>
+                    <div class="admin-notes-content">{{ request.admin_notes }}</div>
+                </div>
+                {% endif %}
+
+                <div class="request-meta">
+                    <span>
+                        <svg width="16" height="16" style="vertical-align: middle;">
+                            <use href="{% static 'icons/icons.svg' %}#icon-calendar"></use>
+                        </svg>
+                        Dibuat: {{ request.created_at|date:"d M Y, H:i" }}
+                    </span>
+                    {% if request.reviewed_at %}
+                    <span>
+                        <svg width="16" height="16" style="vertical-align: middle;">
+                            <use href="{% static 'icons/icons.svg' %}#icon-user"></use>
+                        </svg>
+                        Review: {{ request.reviewed_at|date:"d M Y, H:i" }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <svg>
+                    <use href="{% static 'icons/icons.svg' %}#icon-voucher"></use>
+                </svg>
+                <h3>Belum Ada Request Voucher</h3>
+                <p>Mulai ajukan voucher untuk meningkatkan penjualan laundry Anda</p>
+                <a href="{% url 'partners:create_voucher_request' %}" class="btn-create">
+                    <svg width="20" height="20">
+                        <use href="{% static 'icons/icons.svg' %}#icon-voucher"></use>
+                    </svg>
+                    Request Voucher Pertama
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

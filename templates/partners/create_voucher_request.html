@@ -1,0 +1,475 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Request Voucher Baru - SiBersih{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/animations.css' %}">
+<style>
+    body {
+        background: linear-gradient(135deg, #F0FDFA 0%, #ECFEFF 100%);
+        min-height: 100vh;
+    }
+
+    .voucher-request-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        color: #0F172A;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .page-header h1 svg {
+        color: var(--primary-teal);
+    }
+
+    .page-header p {
+        color: #64748B;
+        font-size: 1.1rem;
+    }
+
+    .voucher-form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        position: relative;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-title svg {
+        color: var(--primary-teal);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-label .required {
+        color: #EF4444;
+        margin-left: 0.25rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.875rem 1.25rem;
+        border: 2px solid #E2E8F0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #F8FAFC;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-teal);
+        background: white;
+        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+    }
+
+    select.form-control {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 20px;
+        padding-right: 3rem;
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+        font-family: inherit;
+    }
+
+    .form-help {
+        font-size: 0.875rem;
+        color: #64748B;
+        margin-top: 0.5rem;
+    }
+
+    .preset-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .preset-card {
+        background: linear-gradient(135deg, #F0FDFA 0%, white 100%);
+        border: 2px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 1.25rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .preset-card:hover {
+        border-color: var(--primary-teal);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(20, 184, 166, 0.15);
+    }
+
+    .preset-card.selected {
+        border-color: var(--primary-teal);
+        background: linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, white 100%);
+    }
+
+    .preset-name {
+        font-weight: 700;
+        color: #0F172A;
+        margin-bottom: 0.5rem;
+        font-size: 1.05rem;
+    }
+
+    .preset-details {
+        font-size: 0.875rem;
+        color: #64748B;
+    }
+
+    .input-group {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .input-group .form-group {
+        flex: 1;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 1.25rem;
+        background: linear-gradient(135deg, var(--primary-teal) 0%, var(--accent-emerald) 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(20, 184, 166, 0.3);
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #64748B;
+        text-decoration: none;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        transition: all 0.2s ease;
+    }
+
+    .btn-back:hover {
+        color: var(--primary-teal);
+    }
+
+    .alert {
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .alert-info {
+        background: #DBEAFE;
+        border: 1px solid #3B82F6;
+        color: #1E40AF;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="voucher-request-container">
+    <a href="{% url 'partners:voucher_request_list' %}" class="btn-back">
+        <svg width="20" height="20">
+            <use href="{% static 'icons/icons.svg' %}#icon-chevron-down"></use>
+        </svg>
+        Kembali
+    </a>
+
+    <div class="page-header animated-bg">
+        <h1>
+            <svg width="40" height="40">
+                <use href="{% static 'icons/icons.svg' %}#icon-voucher"></use>
+            </svg>
+            Request Voucher Baru
+        </h1>
+        <p>Ajukan voucher untuk meningkatkan penjualan laundry Anda</p>
+    </div>
+
+    <div class="voucher-form-card animated-bg">
+        <div class="card-icon-decorator">
+            <svg>
+                <use href="{% static 'icons/icons.svg' %}#icon-voucher"></use>
+            </svg>
+        </div>
+
+        <div class="alert alert-info">
+            <svg width="24" height="24">
+                <use href="{% static 'icons/icons.svg' %}#icon-message"></use>
+            </svg>
+            <span>Request akan ditinjau admin dalam 1-2 hari kerja.</span>
+        </div>
+
+        <form method="POST" id="voucherRequestForm">
+            {% csrf_token %}
+
+            <div class="form-section">
+                <h3 class="section-title">
+                    <svg width="24" height="24">
+                        <use href="{% static 'icons/icons.svg' %}#icon-wash"></use>
+                    </svg>
+                    Pilih Laundry
+                </h3>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Laundry <span class="required">*</span>
+                    </label>
+                    <select name="laundry" class="form-control" required>
+                        <option value="">-- Pilih Laundry --</option>
+                        {% for laundry in laundries %}
+                        <option value="{{ laundry.id }}">{{ laundry.name }} - {{ laundry.district }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">
+                    <svg width="24" height="24">
+                        <use href="{% static 'icons/icons.svg' %}#icon-voucher"></use>
+                    </svg>
+                    Tipe Voucher
+                </h3>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Jenis Voucher <span class="required">*</span>
+                    </label>
+                    <select name="voucher_type" id="voucherType" class="form-control" required>
+                        <option value="">-- Pilih Jenis --</option>
+                        <option value="free_shipping">Free Ongkir</option>
+                        <option value="percentage_discount">Diskon Persentase (%)</option>
+                        <option value="fixed_discount">Diskon Nominal (Rp)</option>
+                        <option value="free_kg">Gratis KG</option>
+                    </select>
+                </div>
+
+                <div id="presetOptions" style="display: none;">
+                    <label class="form-label">Pilih Template</label>
+                    <div class="preset-grid" id="presetGrid"></div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">
+                    <svg width="24" height="24">
+                        <use href="{% static 'icons/icons.svg' %}#icon-edit"></use>
+                    </svg>
+                    Detail Voucher
+                </h3>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Nama Voucher <span class="required">*</span>
+                    </label>
+                    <input type="text" name="voucher_name" id="voucherName" class="form-control" 
+                           placeholder="Contoh: Diskon 20% Min 5KG" required>
+                </div>
+
+                <div class="input-group">
+                    <div class="form-group">
+                        <label class="form-label">
+                            Nilai Diskon <span class="required">*</span>
+                        </label>
+                        <input type="number" name="discount_value" id="discountValue" class="form-control" 
+                               placeholder="0" step="0.01" min="0" required>
+                        <p class="form-help" id="discountHelp">Masukkan nilai diskon</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Min Order (KG)
+                        </label>
+                        <input type="number" name="min_order_kg" id="minOrderKg" class="form-control" 
+                               placeholder="2" step="0.1" min="0" value="2">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="form-group">
+                        <label class="form-label">Total Kuota</label>
+                        <input type="number" name="total_quota" class="form-control" 
+                               placeholder="100" min="1" value="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Durasi (Hari)</label>
+                        <input type="number" name="duration_days" class="form-control" 
+                               placeholder="30" min="1" value="30">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">
+                    <svg width="24" height="24">
+                        <use href="{% static 'icons/icons.svg' %}#icon-message"></use>
+                    </svg>
+                    Alasan
+                </h3>
+
+                <div class="form-group">
+                    <label class="form-label">Jelaskan Alasan <span class="required">*</span></label>
+                    <textarea name="reason" class="form-control" 
+                              placeholder="Jelaskan mengapa Anda ingin memberikan voucher ini..." required></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <svg width="24" height="24">
+                    <use href="{% static 'icons/icons.svg' %}#icon-check"></use>
+                </svg>
+                Kirim Request
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+const voucherPresets = {
+    'free_shipping': [
+        {name: 'Free Ongkir Min 3kg', value: 0, min_kg: 3},
+        {name: 'Free Ongkir Min 5kg', value: 0, min_kg: 5},
+    ],
+    'percentage_discount': [
+        {name: 'Diskon 10%', value: 10, min_kg: 2},
+        {name: 'Diskon 15%', value: 15, min_kg: 3},
+        {name: 'Diskon 20%', value: 20, min_kg: 5},
+    ],
+    'fixed_discount': [
+        {name: 'Diskon Rp 5.000', value: 5000, min_kg: 2},
+        {name: 'Diskon Rp 10.000', value: 10000, min_kg: 3},
+        {name: 'Diskon Rp 15.000', value: 15000, min_kg: 5},
+    ],
+    'free_kg': [
+        {name: 'Gratis 1 KG', value: 1, min_kg: 5},
+        {name: 'Gratis 2 KG', value: 2, min_kg: 10},
+    ],
+};
+
+const voucherType = document.getElementById('voucherType');
+const presetOptions = document.getElementById('presetOptions');
+const presetGrid = document.getElementById('presetGrid');
+const voucherName = document.getElementById('voucherName');
+const discountValue = document.getElementById('discountValue');
+const minOrderKg = document.getElementById('minOrderKg');
+const discountHelp = document.getElementById('discountHelp');
+
+voucherType.addEventListener('change', function() {
+    const type = this.value;
+    
+    if (!type) {
+        presetOptions.style.display = 'none';
+        return;
+    }
+    
+    presetOptions.style.display = 'block';
+    
+    const presets = voucherPresets[type] || [];
+    presetGrid.innerHTML = '';
+    
+    presets.forEach(preset => {
+        const card = document.createElement('div');
+        card.className = 'preset-card';
+        card.innerHTML = `
+            <div class="preset-name">${preset.name}</div>
+            <div class="preset-details">
+                ${type === 'free_shipping' ? 'Free Ongkir' : 
+                  type === 'percentage_discount' ? preset.value + '%' :
+                  type === 'fixed_discount' ? 'Rp ' + preset.value.toLocaleString('id-ID') :
+                  preset.value + ' KG'}
+                <br>Min: ${preset.min_kg} KG
+            </div>
+        `;
+        
+        card.addEventListener('click', function() {
+            document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            
+            voucherName.value = preset.name;
+            discountValue.value = preset.value;
+            minOrderKg.value = preset.min_kg;
+        });
+        
+        presetGrid.appendChild(card);
+    });
+    
+    updateDiscountHelp(type);
+});
+
+function updateDiscountHelp(type) {
+    const helps = {
+        'free_shipping': 'Gratis ongkir',
+        'percentage_discount': 'Persentase 1-100',
+        'fixed_discount': 'Nominal dalam Rupiah',
+        'free_kg': 'Berapa KG gratis'
+    };
+    discountHelp.textContent = helps[type] || '';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,639 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Verifikasi Pembayaran - Admin{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block content %}
+{% include 'components/floating_icons.html' %}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #F0FDFA 0%, #ECFEFF 100%);
+        min-height: 100vh;
+    }
+
+    .admin-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+    
+    .admin-header {
+        background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        color: white;
+        margin-bottom: 2rem;
+    }
+    
+    .admin-header h1 {
+        font-size: 2rem;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .tabs-container {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .tab {
+        padding: 1rem 2rem;
+        background: white;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #64748B;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .tab:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .tab.active {
+        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        color: white;
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    .payments-grid {
+        display: grid;
+        gap: 1.5rem;
+    }
+    
+    .payment-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        display: grid;
+        grid-template-columns: 300px 1fr auto;
+        gap: 1.5rem;
+        align-items: center;
+    }
+    
+    .payment-image {
+        width: 100%;
+        height: 200px;
+        object-fit: contain;
+        border-radius: 12px;
+        background: #F8FAFC;
+        border: 2px solid #E2E8F0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .payment-image:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .payment-info h3 {
+        color: #0F766E;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+    }
+    
+    .info-row {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        color: #64748B;
+    }
+    
+    .info-row strong {
+        color: #334155;
+        min-width: 150px;
+    }
+    
+    .total-amount {
+        color: #0D9488;
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+    
+    .payment-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .btn {
+        padding: 0.875rem 1.5rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .btn-verify {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .btn-reject {
+        background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+        color: white;
+    }
+    
+    .btn-view {
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        color: white;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .status-pending {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+    
+    .status-verified {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+    
+    .status-rejected {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #94A3B8;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .modal.active {
+        display: flex;
+    }
+    
+    .modal-content {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        max-width: 600px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .modal-image {
+        width: 100%;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .modal-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #334155;
+        font-weight: 600;
+    }
+    
+    .form-group textarea {
+        width: 100%;
+        padding: 0.875rem;
+        border: 2px solid #E2E8F0;
+        border-radius: 10px;
+        font-size: 1rem;
+        resize: vertical;
+    }
+    
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #14B8A6;
+    }
+    
+    .modal-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .modal-actions .btn {
+        flex: 1;
+    }
+</style>
+
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>🔍 Verifikasi Pembayaran</h1>
+        <p>Dashboard untuk memverifikasi bukti pembayaran pelanggan</p>
+    </div>
+    
+    <div class="tabs-container">
+        <div class="tab active" onclick="switchTab('pending')">
+            ⏳ Menunggu Verifikasi ({{ pending_payments.count }})
+        </div>
+        <div class="tab" onclick="switchTab('verified')">
+            ✅ Terverifikasi ({{ verified_payments.count }})
+        </div>
+        <div class="tab" onclick="switchTab('rejected')">
+            ❌ Ditolak ({{ rejected_payments.count }})
+        </div>
+    </div>
+    
+    <!-- Pending Payments -->
+    <div class="tab-content active" id="pending-content">
+        <div class="payments-grid">
+            {% if pending_payments %}
+                {% for payment in pending_payments %}
+                <div class="payment-card">
+                    <img src="{{ payment.proof_image.url }}" 
+                         alt="Bukti Pembayaran" 
+                         class="payment-image payment-image-trigger"
+                         data-image-url="{{ payment.proof_image.url }}"
+                         data-payment-id="{{ payment.id }}">
+                    
+                    <div class="payment-info">
+                        <h3>Order #{{ payment.order.order_number }}</h3>
+                        <div class="info-row">
+                            <strong>Pelanggan:</strong>
+                            <span>{{ payment.order.user.get_full_name }}</span>
+                        </div>
+                        <div class="info-row">
+                            <strong>Metode:</strong>
+                            <span>{{ payment.get_payment_method_display|default:payment.payment_method|upper }}</span>
+                        </div>
+                        <div class="info-row">
+                            <strong>Jumlah:</strong>
+                            <span class="total-amount">Rp {{ payment.amount|floatformat:0 }}</span>
+                        </div>
+                        <div class="info-row">
+                            <strong>Upload:</strong>
+                            <span>{{ payment.uploaded_at|date:"d M Y H:i" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <strong>Status:</strong>
+                            <span class="status-badge status-{{ payment.status }}">{{ payment.get_status_display }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-actions">
+                        <button class="btn btn-verify verify-payment-btn" data-payment-id="{{ payment.id }}">
+                            ✅ Verifikasi
+                        </button>
+                        <button class="btn btn-reject reject-payment-btn" data-payment-id="{{ payment.id }}">
+                            ❌ Tolak
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <h3>Tidak ada pembayaran yang menunggu verifikasi</h3>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Verified Payments -->
+    <div class="tab-content" id="verified-content">
+        <div class="payments-grid">
+            {% if verified_payments %}
+                {% for payment in verified_payments %}
+                <div class="payment-card">
+                    <img src="{{ payment.proof_image.url }}" 
+                         alt="Bukti Pembayaran" 
+                         class="payment-image payment-image-trigger"
+                         data-image-url="{{ payment.proof_image.url }}"
+                         data-payment-id="{{ payment.id }}">
+                    
+                    <div class="payment-info">
+                        <h3>Order #{{ payment.order.order_number }}</h3>
+                        <div class="info-row">
+                            <strong>Pelanggan:</strong>
+                            <span>{{ payment.order.user.get_full_name }}</span>
+                        </div>
+                        <div class="info-row">
+                            <strong>Jumlah:</strong>
+                            <span class="total-amount">Rp {{ payment.amount|floatformat:0 }}</span>
+                        </div>
+                        <div class="info-row">
+                            <strong>Diverifikasi:</strong>
+                            <span>{{ payment.verified_at|date:"d M Y H:i" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <strong>Oleh:</strong>
+                            <span>{{ payment.verified_by.username }}</span>
+                        </div>
+                        <div class="info-row">
+                            <strong>Status:</strong>
+                            <span class="status-badge status-{{ payment.status }}">{{ payment.get_status_display }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-actions">
+                        <button class="btn btn-view view-order-btn" data-order-number="{{ payment.order.order_number }}">
+                            👁️ Lihat Order
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <h3>Belum ada pembayaran terverifikasi</h3>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Rejected Payments -->
+    <div class="tab-content" id="rejected-content">
+        <div class="payments-grid">
+            {% if rejected_payments %}
+                {% for payment in rejected_payments %}
+                <div class="payment-card">
+                    <img src="{{ payment.proof_image.url }}" 
+                         alt="Bukti Pembayaran" 
+                         class="payment-image payment-image-trigger"
+                         data-image-url="{{ payment.proof_image.url }}"
+                         data-payment-id="{{ payment.id }}">
+                    
+                    <div class="payment-info">
+                        <h3>Order #{{ payment.order.order_number }}</h3>
+                        <div class="info-row">
+                            <strong>Pelanggan:</strong>
+                            <span>{{ payment.order.user.get_full_name }}</span>
+                        </div>
+                        <div class="info-row">
+                            <strong>Jumlah:</strong>
+                            <span class="total-amount">Rp {{ payment.amount|floatformat:0 }}</span>
+                        </div>
+                        <div class="info-row">
+                            <strong>Ditolak:</strong>
+                            <span>{{ payment.verified_at|date:"d M Y H:i" }}</span>
+                        </div>
+                        {% if payment.admin_notes %}
+                        <div class="info-row">
+                            <strong>Alasan:</strong>
+                            <span style="color: #991B1B;">{{ payment.admin_notes }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="info-row">
+                            <strong>Status:</strong>
+                            <span class="status-badge status-{{ payment.status }}">{{ payment.get_status_display }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-actions">
+                        <button class="btn btn-verify verify-payment-btn" data-payment-id="{{ payment.id }}">
+                            ✅ Verifikasi
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <h3>Tidak ada pembayaran yang ditolak</h3>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="modal" id="imageModal">
+    <button class="modal-close" id="closeImageModal">×</button>
+    <div class="modal-content" id="modalContentWrapper">
+        <img src="" alt="Bukti Pembayaran" class="modal-image" id="modalImage">
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal" id="rejectModal">
+    <button class="modal-close" id="closeRejectModal">×</button>
+    <div class="modal-content" id="rejectModalContent">
+        <h2 style="color: #991B1B; margin-bottom: 1.5rem;">❌ Tolak Pembayaran</h2>
+        <form id="rejectForm">
+            {% csrf_token %}
+            <input type="hidden" id="rejectPaymentId" name="payment_id">
+            
+            <div class="form-group">
+                <label for="adminNotes">Alasan Penolakan *</label>
+                <textarea id="adminNotes" 
+                          name="admin_notes" 
+                          rows="4" 
+                          required 
+                          placeholder="Contoh: Bukti transfer tidak jelas, nominal tidak sesuai, dll."></textarea>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn btn-view" id="cancelRejectBtn">
+                    Batal
+                </button>
+                <button type="submit" class="btn btn-reject">
+                    ❌ Tolak Pembayaran
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    function switchTab(tabName) {
+        // Update tab buttons
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        // Update tab content
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.getElementById(tabName + '-content').classList.add('active');
+    }
+    
+    // Event Listeners for Image Modal
+    document.querySelectorAll('.payment-image-trigger').forEach(img => {
+        img.addEventListener('click', function() {
+            const imageUrl = this.dataset.imageUrl;
+            document.getElementById('modalImage').src = imageUrl;
+            document.getElementById('imageModal').classList.add('active');
+        });
+    });
+    
+    document.getElementById('imageModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+        }
+    });
+    
+    document.getElementById('closeImageModal').addEventListener('click', function() {
+        document.getElementById('imageModal').classList.remove('active');
+    });
+    
+    document.getElementById('modalContentWrapper').addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    
+    // Event Listeners for Verify/Reject Buttons
+    document.querySelectorAll('.verify-payment-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const paymentId = this.dataset.paymentId;
+            if (confirm('Apakah Anda yakin ingin memverifikasi pembayaran ini?')) {
+                verifyPayment(paymentId, 'verify');
+            }
+        });
+    });
+    
+    document.querySelectorAll('.reject-payment-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const paymentId = this.dataset.paymentId;
+            document.getElementById('rejectPaymentId').value = paymentId;
+            document.getElementById('rejectModal').classList.add('active');
+        });
+    });
+    
+    // View Order Button
+    document.querySelectorAll('.view-order-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const orderNumber = this.dataset.orderNumber;
+            window.location.href = `/orders/track/${orderNumber}/`;
+        });
+    });
+    
+    // Reject Modal Controls
+    document.getElementById('rejectModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+            document.getElementById('rejectForm').reset();
+        }
+    });
+    
+    document.getElementById('closeRejectModal').addEventListener('click', function() {
+        document.getElementById('rejectModal').classList.remove('active');
+        document.getElementById('rejectForm').reset();
+    });
+    
+    document.getElementById('cancelRejectBtn').addEventListener('click', function() {
+        document.getElementById('rejectModal').classList.remove('active');
+        document.getElementById('rejectForm').reset();
+    });
+    
+    document.getElementById('rejectModalContent').addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    
+    function verifyPayment(paymentId, action) {
+        const formData = new FormData();
+        formData.append('action', action);
+        formData.append('csrfmiddlewaretoken', csrftoken);
+        
+        fetch(`/orders/admin/verify-payment/${paymentId}/`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(action === 'verify' ? 'Pembayaran berhasil diverifikasi!' : 'Pembayaran berhasil ditolak!');
+                location.reload();
+            } else {
+                alert('Terjadi kesalahan: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat memproses pembayaran');
+        });
+    }
+    
+    // Reject form handler
+    document.getElementById('rejectForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const paymentId = document.getElementById('rejectPaymentId').value;
+        const adminNotes = document.getElementById('adminNotes').value;
+        
+        const formData = new FormData();
+        formData.append('action', 'reject');
+        formData.append('admin_notes', adminNotes);
+        formData.append('csrfmiddlewaretoken', csrftoken);
+        
+        fetch(`/orders/admin/verify-payment/${paymentId}/`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Pembayaran berhasil ditolak!');
+                location.reload();
+            } else {
+                alert('Terjadi kesalahan: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat memproses pembayaran');
+        });
+    });
+</script>
+{% endblock %}

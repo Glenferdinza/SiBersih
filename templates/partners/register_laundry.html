@@ -1,0 +1,742 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if existing_laundry %}Edit Profil Laundry{% else %}Daftarkan Laundry{% endif %} - SiBersih{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    body {
+        background: linear-gradient(135deg, #F0FDFA 0%, #ECFEFF 100%);
+        min-height: 100vh;
+    }
+
+    .laundry-register-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+
+    .register-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .register-header h1 {
+        font-size: 2.5rem;
+        color: #0F766E;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .register-header h1 svg {
+        width: 48px;
+        height: 48px;
+        stroke: #14B8A6;
+    }
+
+    .register-header p {
+        font-size: 1.1rem;
+        color: #64748B;
+    }
+
+    .register-form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .form-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .form-section-title {
+        font-size: 1.3rem;
+        color: #0F766E;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #F1F5F9;
+    }
+
+    .form-section-title svg {
+        width: 24px;
+        height: 24px;
+        stroke: #14B8A6;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 0.5rem;
+    }
+
+    .required {
+        color: #EF4444;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid #E2E8F0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #14B8A6;
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+    }
+
+    .help-text {
+        font-size: 0.875rem;
+        color: #94A3B8;
+        margin-top: 0.25rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .form-grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    /* Map Styles */
+    .map-container {
+        margin: 1.5rem 0;
+    }
+
+    #map {
+        height: 400px;
+        width: 100%;
+        border-radius: 12px;
+        border: 2px solid #E2E8F0;
+    }
+
+    .map-instruction {
+        background: #F0FDFA;
+        border: 2px solid #14B8A6;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .map-instruction svg {
+        width: 24px;
+        height: 24px;
+        stroke: #0F766E;
+        flex-shrink: 0;
+    }
+
+    .location-display {
+        background: #F8FAFC;
+        border: 2px solid #E2E8F0;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 1rem;
+        display: none;
+    }
+
+    .location-display.active {
+        display: block;
+    }
+
+    .location-info {
+        display: flex;
+        align-items: start;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .location-info svg {
+        width: 20px;
+        height: 20px;
+        stroke: #14B8A6;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .location-info-text {
+        flex: 1;
+    }
+
+    .location-label {
+        font-weight: 600;
+        color: #334155;
+        font-size: 0.9rem;
+    }
+
+    .location-value {
+        color: #64748B;
+        font-size: 0.9rem;
+        word-break: break-word;
+    }
+
+    /* Price Input */
+    .price-input-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .currency-label {
+        background: #F1F5F9;
+        padding: 0.875rem 1rem;
+        border: 2px solid #E2E8F0;
+        border-radius: 10px 0 0 10px;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .price-input-wrapper {
+        flex: 1;
+    }
+
+    .price-input-wrapper input {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+
+    .price-unit {
+        background: #F1F5F9;
+        padding: 0.875rem 1rem;
+        border: 2px solid #E2E8F0;
+        border-radius: 0 10px 10px 0;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    /* Checkbox Group */
+    .checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        background: #F8FAFC;
+        padding: 1rem;
+        border-radius: 10px;
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .checkbox-item label {
+        margin: 0;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    /* Submit Button */
+    .btn-submit {
+        width: 100%;
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(13, 148, 136, 0.3);
+    }
+
+    .btn-submit svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .form-grid,
+        .form-grid-3 {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include 'components/floating_icons.html' %}
+
+<div class="laundry-register-container">
+    <div class="register-header">
+        <h1>
+            <svg viewBox="0 0 24 24" fill="none">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M9 22V12h6v10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            {% if existing_laundry %}Edit Profil Laundry{% else %}Daftarkan Laundry Anda{% endif %}
+        </h1>
+        <p>{% if existing_laundry %}Perbarui informasi laundry Anda{% else %}Lengkapi informasi laundry untuk mulai menerima pesanan{% endif %}</p>
+    </div>
+
+    <div class="register-form-card">
+        <form method="post" id="laundryForm"
+              data-existing-lat="{% if existing_laundry.latitude %}{{ existing_laundry.latitude }}{% endif %}"
+              data-existing-lng="{% if existing_laundry.longitude %}{{ existing_laundry.longitude }}{% endif %}"
+              data-existing-address="{% if existing_laundry.address %}{{ existing_laundry.address|escapejs }}{% endif %}">
+            {% csrf_token %}
+            
+            <!-- Basic Information -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Informasi Dasar
+                </h3>
+                
+                <div class="form-group">
+                    <label for="name">Nama Laundry <span class="required">*</span></label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        value="{% if existing_laundry %}{{ existing_laundry.name }}{% endif %}"
+                        placeholder="Contoh: Laundry Bersih Express"
+                        required
+                    >
+                    <p class="help-text">Nama laundry yang akan ditampilkan kepada customer</p>
+                </div>
+            </div>
+
+            <!-- Location Section -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Lokasi Laundry
+                </h3>
+
+                <div class="map-container">
+                    <div class="map-instruction">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span><strong>Geser marker merah</strong> atau <strong>klik pada peta</strong> untuk menandai lokasi laundry Anda</span>
+                    </div>
+                    
+                    <div id="map"></div>
+
+                    <div class="location-display" id="locationDisplay">
+                        <div class="location-info">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M9 11a3 3 0 106 0 3 3 0 00-6 0z" stroke="currentColor" stroke-width="2"/>
+                                <path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            <div class="location-info-text">
+                                <div class="location-label">Alamat Terpilih:</div>
+                                <div class="location-value" id="locationAddress">-</div>
+                            </div>
+                        </div>
+                        <div class="location-info">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <div class="location-info-text">
+                                <div class="location-label">Koordinat:</div>
+                                <div class="location-value" id="locationCoordinates">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="hidden" id="latitude" name="latitude" value="{% if existing_laundry %}{{ existing_laundry.latitude }}{% endif %}">
+                <input type="hidden" id="longitude" name="longitude" value="{% if existing_laundry %}{{ existing_laundry.longitude }}{% endif %}">
+                <input type="hidden" id="address" name="address" value="{% if existing_laundry %}{{ existing_laundry.address }}{% endif %}">
+                <input type="hidden" id="district" name="district" value="{% if existing_laundry %}{{ existing_laundry.district }}{% endif %}">
+            </div>
+
+            <!-- Pricing & Service -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <line x1="12" y1="1" x2="12" y2="23" stroke="currentColor" stroke-width="2"/>
+                        <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Harga & Layanan
+                </h3>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="price_per_kg">Tarif Per Kilogram <span class="required">*</span></label>
+                        <div class="price-input-group">
+                            <div class="currency-label">Rp</div>
+                            <div class="price-input-wrapper">
+                                <input 
+                                    type="number" 
+                                    id="price_per_kg" 
+                                    name="price_per_kg" 
+                                    value="{% if existing_laundry %}{{ existing_laundry.price_per_kg|floatformat:0 }}{% endif %}"
+                                    min="1000"
+                                    step="500"
+                                    placeholder="5000"
+                                    required
+                                >
+                            </div>
+                            <div class="price-unit">per Kg</div>
+                        </div>
+                        <p class="help-text">Harga yang akan dikenakan per kilogram laundry</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="min_order_kg">Minimum Order <span class="required">*</span></label>
+                        <input 
+                            type="number" 
+                            id="min_order_kg" 
+                            name="min_order_kg" 
+                            value="{% if existing_laundry %}{{ existing_laundry.min_order_kg }}{% else %}2.0{% endif %}"
+                            min="0.5"
+                            step="0.5"
+                            placeholder="2.0"
+                            required
+                        >
+                        <p class="help-text">Minimum order dalam kilogram (kg)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Operating Hours -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <polyline points="12 6 12 12 16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Jam Operasional & Estimasi Waktu
+                </h3>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="operating_hours_start">Jam Buka <span class="required">*</span></label>
+                        <input 
+                            type="time" 
+                            id="operating_hours_start" 
+                            name="operating_hours_start" 
+                            value="{% if existing_laundry %}{{ existing_laundry.operating_hours_start|time:'H:i' }}{% else %}08:00{% endif %}"
+                            required
+                        >
+                        <p class="help-text">Jam mulai operasional</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="operating_hours_end">Jam Tutup <span class="required">*</span></label>
+                        <input 
+                            type="time" 
+                            id="operating_hours_end" 
+                            name="operating_hours_end" 
+                            value="{% if existing_laundry %}{{ existing_laundry.operating_hours_end|time:'H:i' }}{% else %}20:00{% endif %}"
+                            required
+                        >
+                        <p class="help-text">Jam selesai operasional</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="estimated_pickup_time">Estimasi Waktu Penjemputan (menit) <span class="required">*</span></label>
+                        <input 
+                            type="number" 
+                            id="estimated_pickup_time" 
+                            name="estimated_pickup_time" 
+                            value="{% if existing_laundry %}{{ existing_laundry.estimated_pickup_time }}{% else %}60{% endif %}"
+                            min="15"
+                            step="15"
+                            placeholder="60"
+                            required
+                        >
+                        <p class="help-text">Waktu yang dibutuhkan untuk menjemput laundry (dalam menit)</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="estimated_delivery_time">Estimasi Waktu Pengerjaan (menit) <span class="required">*</span></label>
+                        <input 
+                            type="number" 
+                            id="estimated_delivery_time" 
+                            name="estimated_delivery_time" 
+                            value="{% if existing_laundry %}{{ existing_laundry.estimated_delivery_time }}{% else %}1440{% endif %}"
+                            min="60"
+                            step="60"
+                            placeholder="1440"
+                            required
+                        >
+                        <p class="help-text">Waktu pengerjaan hingga selesai (1440 menit = 1 hari)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services Available -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <polyline points="9 11 12 14 22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Jenis Layanan Tersedia
+                </h3>
+
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input 
+                            type="checkbox" 
+                            id="has_regular_wash" 
+                            name="has_regular_wash" 
+                            {% if not existing_laundry or existing_laundry.has_regular_wash %}checked{% endif %}
+                        >
+                        <label for="has_regular_wash">Cuci Setrika Reguler</label>
+                    </div>
+
+                    <div class="checkbox-item">
+                        <input 
+                            type="checkbox" 
+                            id="has_dry_clean" 
+                            name="has_dry_clean" 
+                            {% if not existing_laundry or existing_laundry.has_dry_clean %}checked{% endif %}
+                        >
+                        <label for="has_dry_clean">Dry Clean</label>
+                    </div>
+
+                    <div class="checkbox-item">
+                        <input 
+                            type="checkbox" 
+                            id="has_express" 
+                            name="has_express" 
+                            {% if not existing_laundry or existing_laundry.has_express %}checked{% endif %}
+                        >
+                        <label for="has_express">Layanan Express (Lebih Cepat)</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                {% if existing_laundry %}Simpan Perubahan{% else %}Daftarkan Laundry{% endif %}
+            </button>
+        </form>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function() {
+    'use strict';
+    
+    try {
+        // Get form element
+        const form = document.getElementById('laundryForm');
+        if (!form) {
+            console.error('Form not found');
+            return;
+        }
+        
+        // Get existing data from data attributes
+        const existingLat = form.dataset.existingLat ? parseFloat(form.dataset.existingLat) : null;
+        const existingLng = form.dataset.existingLng ? parseFloat(form.dataset.existingLng) : null;
+        const existingAddress = form.dataset.existingAddress || null;
+
+        // Default to Yogyakarta or existing location
+        const defaultLat = existingLat || -7.7715;
+        const defaultLng = existingLng || 110.4021;
+
+        // Check if map container exists
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer) {
+            console.error('Map container not found');
+            return;
+        }
+
+        // Initialize map
+        const map = L.map('map').setView([defaultLat, defaultLng], 13);
+
+        // Add tile layer
+        const timestamp = new Date().getTime();
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png?t=' + timestamp, {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19,
+        }).addTo(map);
+
+        // Custom marker icon (red)
+        const redIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        // Add draggable marker
+        let marker = L.marker([defaultLat, defaultLng], {
+            draggable: true,
+            icon: redIcon
+        }).addTo(map);
+
+        marker.bindPopup("<b>📍 Lokasi Laundry Anda</b><br>Geser marker ini!").openPopup();
+
+        // Update location function
+        function updateLocation(lat, lng) {
+            const latInput = document.getElementById('latitude');
+            const lngInput = document.getElementById('longitude');
+            const coordsDisplay = document.getElementById('locationCoordinates');
+            const locationDisplay = document.getElementById('locationDisplay');
+            
+            if (latInput) latInput.value = lat.toFixed(6);
+            if (lngInput) lngInput.value = lng.toFixed(6);
+            if (coordsDisplay) coordsDisplay.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            if (locationDisplay) locationDisplay.classList.add('active');
+
+            // Reverse geocoding
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+                .then(response => response.json())
+                .then(data => {
+                    let address = data.display_name || 'Alamat tidak ditemukan';
+                    let district = data.address?.suburb || data.address?.city_district || data.address?.county || 'Yogyakarta';
+                    
+                    const addressDisplay = document.getElementById('locationAddress');
+                    const addressInput = document.getElementById('address');
+                    const districtInput = document.getElementById('district');
+                    
+                    if (addressDisplay) addressDisplay.textContent = address;
+                    if (addressInput) addressInput.value = address;
+                    if (districtInput) districtInput.value = district;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const addressDisplay = document.getElementById('locationAddress');
+                    const addressInput = document.getElementById('address');
+                    
+                    if (addressDisplay) addressDisplay.textContent = 'Gagal memuat alamat';
+                    if (addressInput) addressInput.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                });
+        }
+
+        // Initialize with existing or default location
+        if (existingAddress) {
+            const addressDisplay = document.getElementById('locationAddress');
+            const coordsDisplay = document.getElementById('locationCoordinates');
+            const locationDisplay = document.getElementById('locationDisplay');
+            
+            if (addressDisplay) addressDisplay.textContent = existingAddress;
+            if (coordsDisplay) coordsDisplay.textContent = `${defaultLat.toFixed(6)}, ${defaultLng.toFixed(6)}`;
+            if (locationDisplay) locationDisplay.classList.add('active');
+        } else {
+            updateLocation(defaultLat, defaultLng);
+        }
+
+        // Marker drag event
+        marker.on('dragend', function(e) {
+            const position = marker.getLatLng();
+            updateLocation(position.lat, position.lng);
+            map.panTo(position);
+        });
+
+        // Map click event
+        map.on('click', function(e) {
+            marker.setLatLng(e.latlng);
+            updateLocation(e.latlng.lat, e.latlng.lng);
+            marker.openPopup();
+        });
+
+        // Try to get user's current location (only if not editing)
+        if (navigator.geolocation && !existingLat) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    map.setView([userLat, userLng], 15);
+                    marker.setLatLng([userLat, userLng]);
+                    updateLocation(userLat, userLng);
+                },
+                function(error) {
+                    console.log('Geolocation error:', error);
+                }
+            );
+        }
+
+        // Form validation
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const lat = document.getElementById('latitude')?.value;
+                const lng = document.getElementById('longitude')?.value;
+
+                if (!lat || !lng) {
+                    e.preventDefault();
+                    alert('Silakan pilih lokasi laundry di peta terlebih dahulu!');
+                    return false;
+                }
+
+                // Show loading state
+                const submitBtn = this.querySelector('.btn-submit');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<svg style="animation: spin 1s linear infinite; width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.25"/><path d="M4 12a8 8 0 018-8V0" opacity="0.75"/></svg> Menyimpan...';
+                    submitBtn.disabled = true;
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error initializing laundry form:', error);
+    }
+})();
+</script>
+
+<style>
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+{% endblock %}

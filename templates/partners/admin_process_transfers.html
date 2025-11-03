@@ -1,0 +1,554 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Proses Transfer Mitra - SiBersih{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 100%);
+        min-height: 100vh;
+    }
+
+    .transfer-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+    
+    .transfer-header {
+        background: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        color: white;
+        margin-bottom: 2rem;
+    }
+    
+    .transfer-header h1 {
+        font-size: 2rem;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-label {
+        color: #64748B;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #7C3AED;
+    }
+    
+    .stat-card.pending {
+        border-left: 4px solid #F59E0B;
+    }
+    
+    .stat-card.processing {
+        border-left: 4px solid #3B82F6;
+    }
+    
+    .stat-card.completed {
+        border-left: 4px solid #10B981;
+    }
+    
+    .tabs-container {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .tab {
+        padding: 1rem 2rem;
+        background: white;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #64748B;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .tab:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .tab.active {
+        background: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%);
+        color: white;
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    .transaction-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .transaction-card:hover {
+        box-shadow: 0 6px 30px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #F1F5F9;
+    }
+    
+    .order-number {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #7C3AED;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    
+    .status-pending {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+    
+    .status-processing {
+        background: #DBEAFE;
+        color: #1E40AF;
+    }
+    
+    .status-completed {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+    
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .info-section {
+        background: #F8FAFC;
+        padding: 1.25rem;
+        border-radius: 12px;
+    }
+    
+    .info-title {
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        color: #64748B;
+    }
+    
+    .info-value {
+        font-weight: 600;
+        color: #1E293B;
+    }
+    
+    .amount-highlight {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #10B981;
+    }
+    
+    .bank-section {
+        background: #ECFDF5;
+        border-left: 4px solid #10B981;
+    }
+    
+    .action-form {
+        background: #FAF5FF;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-top: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #334155;
+        font-weight: 600;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #E2E8F0;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #7C3AED;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+    
+    .btn-process {
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        color: white;
+    }
+    
+    .btn-process:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-complete {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .btn-complete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #94A3B8;
+        background: white;
+        border-radius: 16px;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+    
+    @media (max-width: 968px) {
+        .stats-grid,
+        .card-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="transfer-container">
+    <div class="transfer-header">
+        <h1>💸 Proses Transfer ke Mitra</h1>
+        <p>Kelola transfer pendapatan ke mitra laundry</p>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card pending">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-label">Total Pending</div>
+            <div class="stat-value">Rp {{ total_pending|floatformat:0 }}</div>
+        </div>
+        
+        <div class="stat-card processing">
+            <div class="stat-icon">🔄</div>
+            <div class="stat-label">Sedang Diproses</div>
+            <div class="stat-value">Rp {{ total_processing|floatformat:0 }}</div>
+        </div>
+        
+        <div class="stat-card completed">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">Selesai Hari Ini</div>
+            <div class="stat-value">Rp {{ total_completed_today|floatformat:0 }}</div>
+        </div>
+    </div>
+    
+    <!-- Tabs -->
+    <div class="tabs-container">
+        <div class="tab active" onclick="switchTab('pending')">
+            ⏳ Pending ({{ pending_transactions.count }})
+        </div>
+        <div class="tab" onclick="switchTab('processing')">
+            🔄 Processing ({{ processing_transactions.count }})
+        </div>
+        <div class="tab" onclick="switchTab('completed')">
+            ✅ Completed ({{ completed_transactions.count }})
+        </div>
+    </div>
+    
+    <!-- Pending Transactions -->
+    <div class="tab-content active" id="pending-content">
+        {% if pending_transactions %}
+            {% for transaction in pending_transactions %}
+            <div class="transaction-card">
+                <div class="card-header">
+                    <div class="order-number">📦 {{ transaction.order.order_number }}</div>
+                    <span class="status-badge status-{{ transaction.status }}">{{ transaction.get_status_display }}</span>
+                </div>
+                
+                <div class="card-grid">
+                    <div class="info-section">
+                        <div class="info-title">📊 Informasi Transaksi</div>
+                        <div class="info-row">
+                            <span>Mitra:</span>
+                            <span class="info-value">{{ transaction.mitra.business_name }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Total Pembayaran:</span>
+                            <span class="info-value">Rp {{ transaction.gross_amount|floatformat:0 }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Fee Platform (3%):</span>
+                            <span class="info-value">Rp {{ transaction.platform_fee|floatformat:0 }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Transfer ke Mitra:</span>
+                            <span class="amount-highlight">Rp {{ transaction.mitra_earning|floatformat:0 }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section bank-section">
+                        <div class="info-title">🏦 Rekening Tujuan</div>
+                        <div class="info-row">
+                            <span>Bank:</span>
+                            <span class="info-value">{{ transaction.bank_name }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span>No. Rekening:</span>
+                            <span class="info-value">{{ transaction.bank_account_number }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Atas Nama:</span>
+                            <span class="info-value">{{ transaction.bank_account_name }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-form">
+                    <form method="POST" action="{% url 'partners:process_transfer' transaction.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="process">
+                        <button type="submit" class="btn btn-process">
+                            🔄 Mulai Proses Transfer
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h3>Tidak ada transfer pending</h3>
+                <p>Semua transfer sudah diproses</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Processing Transactions -->
+    <div class="tab-content" id="processing-content">
+        {% if processing_transactions %}
+            {% for transaction in processing_transactions %}
+            <div class="transaction-card">
+                <div class="card-header">
+                    <div class="order-number">📦 {{ transaction.order.order_number }}</div>
+                    <span class="status-badge status-{{ transaction.status }}">{{ transaction.get_status_display }}</span>
+                </div>
+                
+                <div class="card-grid">
+                    <div class="info-section">
+                        <div class="info-title">📊 Informasi Transaksi</div>
+                        <div class="info-row">
+                            <span>Mitra:</span>
+                            <span class="info-value">{{ transaction.mitra.business_name }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Transfer ke Mitra:</span>
+                            <span class="amount-highlight">Rp {{ transaction.mitra_earning|floatformat:0 }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Diproses:</span>
+                            <span class="info-value">{{ transaction.processed_at|date:"d M Y H:i" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Oleh:</span>
+                            <span class="info-value">{{ transaction.processed_by.username }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section bank-section">
+                        <div class="info-title">🏦 Rekening Tujuan</div>
+                        <div class="info-row">
+                            <span>Bank:</span>
+                            <span class="info-value">{{ transaction.bank_name }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span>No. Rekening:</span>
+                            <span class="info-value">{{ transaction.bank_account_number }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Atas Nama:</span>
+                            <span class="info-value">{{ transaction.bank_account_name }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-form">
+                    <form method="POST" action="{% url 'partners:process_transfer' transaction.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="complete">
+                        
+                        <div class="form-group">
+                            <label>Nomor Referensi Transfer:</label>
+                            <input type="text" name="transfer_reference" required placeholder="Contoh: TRF202401150001">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Catatan (Opsional):</label>
+                            <textarea name="transfer_notes" rows="3" placeholder="Catatan tambahan..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-complete">
+                            ✅ Tandai Selesai
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h3>Tidak ada transfer yang sedang diproses</h3>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Completed Transactions -->
+    <div class="tab-content" id="completed-content">
+        {% if completed_transactions %}
+            {% for transaction in completed_transactions %}
+            <div class="transaction-card">
+                <div class="card-header">
+                    <div class="order-number">📦 {{ transaction.order.order_number }}</div>
+                    <span class="status-badge status-{{ transaction.status }}">{{ transaction.get_status_display }}</span>
+                </div>
+                
+                <div class="card-grid">
+                    <div class="info-section">
+                        <div class="info-title">📊 Informasi Transaksi</div>
+                        <div class="info-row">
+                            <span>Mitra:</span>
+                            <span class="info-value">{{ transaction.mitra.business_name }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Transfer ke Mitra:</span>
+                            <span class="amount-highlight">Rp {{ transaction.mitra_earning|floatformat:0 }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Selesai:</span>
+                            <span class="info-value">{{ transaction.completed_at|date:"d M Y H:i" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Referensi:</span>
+                            <span class="info-value">{{ transaction.transfer_reference|default:"-" }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section bank-section">
+                        <div class="info-title">🏦 Rekening Tujuan</div>
+                        <div class="info-row">
+                            <span>Bank:</span>
+                            <span class="info-value">{{ transaction.bank_name }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span>No. Rekening:</span>
+                            <span class="info-value">{{ transaction.bank_account_number }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Atas Nama:</span>
+                            <span class="info-value">{{ transaction.bank_account_name }}</span>
+                        </div>
+                        {% if transaction.transfer_notes %}
+                        <div class="info-row">
+                            <span>Catatan:</span>
+                            <span class="info-value">{{ transaction.transfer_notes }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h3>Belum ada transfer selesai</h3>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function switchTab(tabName) {
+        // Update tab buttons
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        // Update tab content
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.getElementById(tabName + '-content').classList.add('active');
+    }
+</script>
+{% endblock %}

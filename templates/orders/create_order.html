@@ -1,0 +1,908 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Buat Pesanan - SiBersih{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/animations.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include 'components/floating_icons.html' %}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #F0FDFA 0%, #ECFEFF 100%);
+        min-height: 100vh;
+    }
+
+    .laundry-card-item {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .status-badge-card {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        color: white;
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        z-index: 10;
+    }
+
+    .status-badge-card.status-buka {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .status-badge-card.status-tutup {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .status-badge-card.status-full {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .status-badge-card.status-istirahat {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    }
+
+    .order-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+    
+    .order-header {
+        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        color: white;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .order-header h1 {
+        font-size: 2.5rem;
+        margin: 0 0 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .order-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+    
+    .order-content {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 2rem;
+        align-items: start;
+    }
+    
+    .order-form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    
+    .laundry-info-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        position: sticky;
+        top: 2rem;
+    }
+    
+    .laundry-selector {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        border-radius: 15px;
+        color: white;
+        margin-bottom: 2rem;
+    }
+    
+    .laundry-selector h3 {
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+    }
+    
+    .laundry-select {
+        width: 100%;
+        padding: 1rem;
+        border-radius: 10px;
+        border: none;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .form-section h3 {
+        color: #0F766E;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #334155;
+        font-weight: 500;
+    }
+    
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 0.875rem;
+        border: 2px solid #E2E8F0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #14B8A6;
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+    }
+    
+    .weight-input-wrapper {
+        position: relative;
+    }
+    
+    .weight-unit {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #64748B;
+        font-weight: 600;
+    }
+    
+    .payment-methods {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .payment-option {
+        position: relative;
+    }
+    
+    .payment-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+    }
+    
+    .payment-label {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.2rem;
+        border: 2px solid #E2E8F0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .payment-label:hover {
+        border-color: #14B8A6;
+        background: rgba(20, 184, 166, 0.02);
+    }
+    
+    .payment-option input[type="radio"]:checked + .payment-label {
+        border-color: #14B8A6;
+        background: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(20, 184, 166, 0.08) 100%);
+    }
+    
+    .payment-icon {
+        font-size: 2rem;
+        width: 50px;
+        text-align: center;
+    }
+    
+    .payment-info {
+        flex: 1;
+    }
+    
+    .payment-title {
+        font-weight: 600;
+        color: #0F766E;
+        font-size: 1.1rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .payment-option input[type="radio"]:checked + .payment-label .payment-title {
+        color: #0D9488;
+    }
+    
+    .payment-desc {
+        color: #64748B;
+        font-size: 0.9rem;
+    }
+    
+    .payment-check {
+        width: 24px;
+        height: 24px;
+        border: 2px solid #CBD5E1;
+        border-radius: 50%;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .payment-option input[type="radio"]:checked + .payment-label .payment-check {
+        border-color: #14B8A6;
+        background: #14B8A6;
+    }
+    
+    .payment-option input[type="radio"]:checked + .payment-label .payment-check::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+    }
+    
+    .bank-transfer-options {
+        display: none;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #F8FAFC;
+        border-radius: 10px;
+    }
+    
+    .bank-transfer-options.active {
+        display: grid;
+    }
+    
+    .bank-option {
+        position: relative;
+    }
+    
+    .bank-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+    }
+    
+    .bank-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        border: 2px solid #E2E8F0;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+        text-align: center;
+    }
+    
+    .bank-label:hover {
+        border-color: #14B8A6;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .bank-option input[type="radio"]:checked + .bank-label {
+        border-color: #14B8A6;
+        background: linear-gradient(135deg, rgba(13, 148, 136, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%);
+    }
+    
+    .bank-icon {
+        font-size: 2rem;
+        width: 100%;
+    }
+    
+    .bank-name {
+        font-weight: 600;
+        color: #334155;
+        font-size: 0.95rem;
+    }
+    
+    .payment-note {
+        background: #FEF3C7;
+        border-left: 4px solid #F59E0B;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        color: #92400E;
+    }
+    
+    .payment-note strong {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #78350F;
+    }
+    
+    .info-card-header {
+        text-align: center;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid #F1F5F9;
+        margin-bottom: 1.5rem;
+    }
+    
+    .laundry-name {
+        font-size: 1.5rem;
+        color: #0F766E;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .laundry-address {
+        color: #64748B;
+        font-size: 0.9rem;
+    }
+    
+    .price-breakdown {
+        margin-top: 1.5rem;
+    }
+    
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #F1F5F9;
+    }
+    
+    .price-row:last-child {
+        border-bottom: none;
+        padding-top: 1rem;
+        margin-top: 0.5rem;
+        border-top: 2px solid #0D9488;
+    }
+    
+    .price-label {
+        color: #64748B;
+        font-size: 0.95rem;
+    }
+    
+    .price-value {
+        color: #334155;
+        font-weight: 600;
+    }
+    
+    .total-price .price-label {
+        color: #0F766E;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+    
+    .total-price .price-value {
+        color: #0F766E;
+        font-weight: 700;
+        font-size: 1.3rem;
+    }
+    
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+        color: #64748B;
+        font-size: 0.95rem;
+    }
+    
+    .info-icon {
+        width: 20px;
+        height: 20px;
+        color: #14B8A6;
+    }
+    
+    .btn-submit {
+        width: 100%;
+        padding: 1.2rem;
+        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(13, 148, 136, 0.3);
+    }
+    
+    .cod-rates-info {
+        background: #F0FDFA;
+        border-left: 4px solid #14B8A6;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .cod-rates-info h4 {
+        color: #0F766E;
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .cod-rate-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        font-size: 0.9rem;
+        color: #64748B;
+    }
+    
+    @media (max-width: 968px) {
+        .order-content {
+            grid-template-columns: 1fr;
+        }
+        
+        .laundry-info-card {
+            position: static;
+        }
+    }
+</style>
+
+<div class="order-container">
+    <div class="order-header animated-bg">
+        <div class="bg-decorator bubble-1"></div>
+        <div class="bg-decorator bubble-2"></div>
+        <div class="bg-decorator wave"></div>
+        
+        <h1>
+            <svg width="40" height="40">
+                <use href="{% static 'icons/icons.svg' %}#icon-package"></use>
+            </svg>
+            Buat Pesanan Laundry
+        </h1>
+        <p>Isi detail pesanan Anda untuk {{ selected_laundry.name }}</p>
+    </div>
+    
+    <!-- Show order form -->
+    <div class="order-content">
+        <div class="order-form-card animated-bg">
+            <form method="post" id="orderForm">
+                {% csrf_token %}
+                
+                <!-- Selected Laundry Info -->
+                <div class="laundry-selector">
+                    <h3>
+                        <svg width="24" height="24" style="vertical-align: middle; margin-right: 8px;">
+                            <use href="{% static 'icons/icons.svg' %}#icon-location"></use>
+                        </svg>
+                        Laundry Terpilih
+                    </h3>
+                    <input type="hidden" name="laundry" id="laundrySelect" value="{{ selected_laundry.id }}">
+                    <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border-radius: 12px; padding: 20px; margin-top: 12px;">
+                        <h4 style="font-size: 1.2rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">{{ selected_laundry.name }}</h4>
+                        <p style="color: #64748b; margin-bottom: 12px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            {{ selected_laundry.address }}, {{ selected_laundry.district }}
+                        </p>
+                        <div style="display: flex; gap: 20px; align-items: center;">
+                            <div style="color: #0d9488; font-weight: 700;">
+                                Rp {{ selected_laundry.price_per_kg|floatformat:0 }}/kg
+                            </div>
+                            <div style="color: #f59e0b; font-weight: 700;">
+                                ⭐ {{ selected_laundry.rating|floatformat:1 }}
+                            </div>
+                            <div style="color: #64748b;">
+                                ⏱️ ~{{ selected_laundry.estimated_pickup_time }} mnt
+                            </div>
+                        </div>
+                        <a href="{% url 'core:dashboard' %}" style="display: inline-block; margin-top: 12px; color: #0d9488; text-decoration: underline; font-size: 0.9rem;">
+                            ← Ganti laundry
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Order Details -->
+                <div class="form-section">
+                    <h3>
+                        <svg width="24" height="24" style="vertical-align: middle; margin-right: 8px;">
+                            <use href="{% static 'icons/icons.svg' %}#icon-package"></use>
+                        </svg>
+                        Detail Pesanan
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="weight_kg">Berat Cucian (kg)</label>
+                        <div class="weight-input-wrapper">
+                            <input type="number" id="weight_kg" name="weight_kg" 
+                                   step="0.5" min="0.5" value="2.0" required 
+                                   oninput="calculatePrice()">
+                            <span class="weight-unit">kg</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="delivery_address">Alamat Pengantaran</label>
+                        <textarea id="delivery_address" name="delivery_address" 
+                                  rows="3" required placeholder="Jl. Contoh No. 123, Yogyakarta"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pickup_time">Waktu Penjemputan</label>
+                        <input type="datetime-local" id="pickup_time" name="pickup_time" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">Catatan (opsional)</label>
+                        <textarea id="notes" name="notes" rows="2" 
+                                  placeholder="Contoh: Pisahkan pakaian putih dan berwarna"></textarea>
+                    </div>
+                </div>
+                
+                <!-- Payment Method -->
+                <div class="form-section">
+                    <h3>
+                        <svg width="24" height="24" style="vertical-align: middle; margin-right: 8px;">
+                            <use href="{% static 'icons/icons.svg' %}#icon-money"></use>
+                        </svg>
+                        Metode Pembayaran
+                    </h3>
+                    
+                    <div class="payment-methods">
+                        <!-- COD -->
+                        <div class="payment-option">
+                            <input type="radio" id="cod" name="payment_method" value="cod" checked onchange="toggleBankOptions()">
+                            <label for="cod" class="payment-label">
+                                <div class="payment-icon">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                        <line x1="2" y1="10" x2="22" y2="10"/>
+                                    </svg>
+                                </div>
+                                <div class="payment-info">
+                                    <div class="payment-title">Cash on Delivery (COD)</div>
+                                    <div class="payment-desc">Bayar tunai saat laundry diantar</div>
+                                </div>
+                                <div class="payment-check"></div>
+                            </label>
+                        </div>
+                        
+                        <!-- QRIS -->
+                        <div class="payment-option">
+                            <input type="radio" id="qris" name="payment_method" value="qris" onchange="toggleBankOptions()">
+                            <label for="qris" class="payment-label">
+                                <div class="payment-icon">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="7" height="7"/>
+                                        <rect x="14" y="3" width="7" height="7"/>
+                                        <rect x="14" y="14" width="7" height="7"/>
+                                        <rect x="3" y="14" width="7" height="7"/>
+                                    </svg>
+                                </div>
+                                <div class="payment-info">
+                                    <div class="payment-title">QRIS / QR Code</div>
+                                    <div class="payment-desc">Scan QR dengan aplikasi e-wallet</div>
+                                </div>
+                                <div class="payment-check"></div>
+                            </label>
+                        </div>
+                        
+                        <!-- Bank Transfer -->
+                        <div class="payment-option">
+                            <input type="radio" id="bank_transfer" name="payment_method_group" value="bank" onchange="toggleBankOptions()">
+                            <label for="bank_transfer" class="payment-label">
+                                <div class="payment-icon">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                        <polyline points="9 22 9 12 15 12 15 22"/>
+                                    </svg>
+                                </div>
+                                <div class="payment-info">
+                                    <div class="payment-title">Transfer Bank</div>
+                                    <div class="payment-desc">Transfer ke rekening bank</div>
+                                </div>
+                                <div class="payment-check"></div>
+                            </label>
+                            
+                            <!-- Bank Options (Hidden by default) -->
+                            <div class="bank-transfer-options" id="bankOptions">
+                                <div class="bank-option">
+                                    <input type="radio" id="bri" name="payment_method" value="bri">
+                                    <label for="bri" class="bank-label">
+                                        <div class="bank-icon">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                                <line x1="2" y1="10" x2="22" y2="10"/>
+                                            </svg>
+                                        </div>
+                                        <div class="bank-name">Bank BRI</div>
+                                    </label>
+                                </div>
+                                
+                                <div class="bank-option">
+                                    <input type="radio" id="bca" name="payment_method" value="bca">
+                                    <label for="bca" class="bank-label">
+                                        <div class="bank-icon">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                                <line x1="2" y1="10" x2="22" y2="10"/>
+                                            </svg>
+                                        </div>
+                                        <div class="bank-name">Bank BCA</div>
+                                    </label>
+                                </div>
+                                
+                                <div class="bank-option">
+                                    <input type="radio" id="seabank" name="payment_method" value="seabank">
+                                    <label for="seabank" class="bank-label">
+                                        <div class="bank-icon">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+                                            </svg>
+                                        </div>
+                                        <div class="bank-name">SeaBank</div>
+                                    </label>
+                                </div>
+                                
+                                <div class="bank-option">
+                                    <input type="radio" id="shopee" name="payment_method" value="shopee">
+                                    <label for="shopee" class="bank-label">
+                                        <div class="bank-icon">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="9" cy="21" r="1"/>
+                                                <circle cx="20" cy="21" r="1"/>
+                                                <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+                                            </svg>
+                                        </div>
+                                        <div class="bank-name">ShopeePay</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-note">
+                        <svg width="16" height="16" style="vertical-align: middle; margin-right: 6px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="16" x2="12" y2="12"/>
+                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        <strong>Catatan Pembayaran:</strong>
+                        Untuk pembayaran online (QRIS/Bank Transfer), Anda akan diarahkan ke halaman upload bukti pembayaran setelah pesanan dibuat. Pesanan akan diproses setelah pembayaran diverifikasi oleh admin.
+                    </div>
+                </div>
+                
+                <!-- COD Rates Info -->
+                <div class="cod-rates-info">
+                    <h4>
+                        <svg width="20" height="20" style="vertical-align: middle; margin-right: 6px;">
+                            <use href="{% static 'icons/icons.svg' %}#icon-truck"></use>
+                        </svg>
+                        Tarif COD Berdasarkan Jarak:
+                    </h4>
+                    {% for rate in cod_rates %}
+                    <div class="cod-rate-item">
+                        <span>{{ rate.min_distance_km }} - {{ rate.max_distance_km }} km</span>
+                        <strong>Rp {{ rate.fee|floatformat:0 }}</strong>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Voucher Section -->
+                <div class="voucher-section" style="background: linear-gradient(135deg, #FEF3C7, #FDE047); border-radius: 16px; padding: 1.5rem; margin: 1.5rem 0; border: 2px dashed #F59E0B;">
+                    <h4 style="color: #92400E; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <svg width="24" height="24">
+                            <use href="{% static 'icons/icons.svg' %}#icon-voucher"></use>
+                        </svg>
+                        Gunakan Voucher (Opsional)
+                    </h4>
+                    <select name="voucher" id="voucherSelect" class="laundry-select" style="background: white;">
+                        <option value="">-- Tidak Menggunakan Voucher --</option>
+                        <!-- Voucher options will be loaded dynamically -->
+                    </select>
+                    <p style="font-size: 0.875rem; color: #78350F; margin-top: 0.75rem; margin-bottom: 0;">
+                        💡 Pilih laundry terlebih dahulu untuk melihat voucher yang tersedia
+                    </p>
+                </div>
+                
+                <button type="submit" class="btn-submit">
+                    <svg width="24" height="24" style="vertical-align: middle; margin-right: 8px;">
+                        <use href="{% static 'icons/icons.svg' %}#icon-check"></use>
+                    </svg>
+                    Buat Pesanan Sekarang
+                </button>
+            </form>
+        </div>
+        
+        <!-- Order Summary -->
+        <div class="laundry-info-card animated-bg">
+            <div class="info-card-header">
+                <div class="laundry-name" id="summaryName">
+                    {% if selected_laundry %}{{ selected_laundry.name }}{% else %}Pilih Laundry{% endif %}
+                </div>
+                <div class="laundry-address" id="summaryAddress">
+                    {% if selected_laundry %}{{ selected_laundry.address }}{% else %}--{% endif %}
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                </svg>
+                <span>Rating: <strong id="summaryRating">--</strong>/5.0</span>
+            </div>
+            
+            <div class="info-item">
+                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>Estimasi Pickup: <strong id="summaryPickup">--</strong> menit</span>
+            </div>
+            
+            <div class="price-breakdown">
+                <h3 style="color: #0F766E; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg width="24" height="24">
+                        <use href="{% static 'icons/icons.svg' %}#icon-money"></use>
+                    </svg>
+                    Rincian Harga
+                </h3>
+                
+                <div class="price-row">
+                    <span class="price-label">Harga Laundry</span>
+                    <span class="price-value" id="laundryPrice">Rp 0</span>
+                </div>
+                
+                <div class="price-row">
+                    <span class="price-label">Biaya COD</span>
+                    <span class="price-value" id="codFee">Rp 0</span>
+                </div>
+                
+                <div class="price-row">
+                    <span class="price-label">Platform Fee (3%)</span>
+                    <span class="price-value" id="platformFee">Rp 0</span>
+                </div>
+                
+                <div class="price-row total-price">
+                    <span class="price-label">Total Bayar</span>
+                    <span class="price-value" id="totalPrice">Rp 0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- COD Rates Data -->
+<script id="cod-rates-data" type="application/json">
+[
+    {% for rate in cod_rates %}
+    {"min": {{ rate.min_distance_km }}, "max": {{ rate.max_distance_km }}, "fee": {{ rate.fee }}}{% if not forloop.last %},{% endif %}
+    {% endfor %}
+]
+</script>
+
+<!-- Selected Laundry Flag -->
+<script id="selected-laundry-flag" type="application/json">
+{% if selected_laundry %}true{% else %}false{% endif %}
+</script>
+
+<script id="laundry-data" type="application/json">
+{
+    "pricePerKg": {{ selected_laundry.price_per_kg }},
+    "name": "{{ selected_laundry.name|escapejs }}",
+    "address": "{{ selected_laundry.address|escapejs }}, {{ selected_laundry.district|escapejs }}"
+}
+</script>
+
+<script>
+    // COD Rates from backend
+    const codRates = JSON.parse(document.getElementById('cod-rates-data').textContent);
+    
+    // Check if laundry is pre-selected
+    const hasSelectedLaundry = JSON.parse(document.getElementById('selected-laundry-flag').textContent);
+    
+    // Default distance (from Yogyakarta city center)
+    const defaultDistance = 5; // km
+    
+    // Laundry info is already selected, no need to update
+    // Initialize price calculation
+    window.addEventListener('DOMContentLoaded', function() {
+        calculatePrice();
+    });
+    
+    function getCODFee(distance) {
+        for (let rate of codRates) {
+            if (distance >= rate.min && distance < rate.max) {
+                return rate.fee;
+            }
+        }
+        return codRates[codRates.length - 1].fee; // Return highest if beyond range
+    }
+    
+    function toggleBankOptions() {
+        const bankTransferRadio = document.getElementById('bank_transfer');
+        const bankOptions = document.getElementById('bankOptions');
+        
+        if (bankTransferRadio.checked) {
+            bankOptions.classList.add('active');
+            // Auto-select first bank option if none selected
+            const selectedBank = document.querySelector('input[name="payment_method"]:checked');
+            if (!selectedBank || !['bri', 'bca', 'seabank', 'shopee'].includes(selectedBank.value)) {
+                document.getElementById('bri').checked = true;
+            }
+        } else {
+            bankOptions.classList.remove('active');
+            // Clear bank selections when switching to COD or QRIS
+            document.querySelectorAll('.bank-option input[type="radio"]').forEach(radio => {
+                radio.checked = false;
+            });
+        }
+    }
+    
+    // Store laundry data from Django context
+    const laundryDataElement = document.getElementById('laundry-data');
+    const laundryData = laundryDataElement ? JSON.parse(laundryDataElement.textContent) : {
+        pricePerKg: parseFloat('{{ selected_laundry.price_per_kg }}'),
+        name: '{{ selected_laundry.name|escapejs }}',
+        address: '{{ selected_laundry.address|escapejs }}, {{ selected_laundry.district|escapejs }}'
+    };
+    
+    function calculatePrice() {
+        const weight = parseFloat(document.getElementById('weight_kg').value) || 0;
+        
+        if (weight > 0) {
+            const laundryPrice = laundryData.pricePerKg * weight;
+            const codFee = getCODFee(defaultDistance);
+            const platformFee = laundryPrice * 0.03;
+            const total = laundryPrice + codFee + platformFee;
+            
+            document.getElementById('laundryPrice').textContent = 'Rp ' + laundryPrice.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+            document.getElementById('codFee').textContent = 'Rp ' + codFee.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+            document.getElementById('platformFee').textContent = 'Rp ' + platformFee.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+            document.getElementById('totalPrice').textContent = 'Rp ' + total.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        } else {
+            document.getElementById('laundryPrice').textContent = 'Rp 0';
+            document.getElementById('codFee').textContent = 'Rp 0';
+            document.getElementById('platformFee').textContent = 'Rp 0';
+            document.getElementById('totalPrice').textContent = 'Rp 0';
+        }
+    }
+    
+    // Set minimum datetime to now
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('pickup_time').min = now.toISOString().slice(0, 16);
+</script>
+{% endblock %}

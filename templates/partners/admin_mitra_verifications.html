@@ -1,0 +1,715 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Verifikasi Mitra - Admin{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block content %}
+{% include 'components/floating_icons.html' %}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #F0FDFA 0%, #ECFEFF 100%);
+        min-height: 100vh;
+    }
+
+    .admin-container {
+        max-width: 1600px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+    
+    .admin-header {
+        background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        color: white;
+        margin-bottom: 2rem;
+    }
+    
+    .admin-header h1 {
+        font-size: 2rem;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .tabs-container {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .tab {
+        padding: 1rem 2rem;
+        background: white;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #64748B;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .tab:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .tab.active {
+        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        color: white;
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    .verifications-grid {
+        display: grid;
+        gap: 1.5rem;
+    }
+    
+    .verification-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #F1F5F9;
+    }
+    
+    .business-info h3 {
+        color: #0F766E;
+        margin-bottom: 0.5rem;
+        font-size: 1.3rem;
+    }
+    
+    .user-info {
+        color: #64748B;
+        font-size: 0.9rem;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .status-pending {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+    
+    .status-approved {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+    
+    .status-rejected {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+    
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .info-section {
+        background: #F8FAFC;
+        padding: 1rem;
+        border-radius: 12px;
+    }
+    
+    .info-section h4 {
+        color: #334155;
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        font-size: 0.9rem;
+        border-bottom: 1px solid #E2E8F0;
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        color: #64748B;
+    }
+    
+    .info-value {
+        color: #334155;
+        font-weight: 600;
+    }
+    
+    .photos-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .photo-item {
+        text-align: center;
+    }
+    
+    .photo-label {
+        font-size: 0.85rem;
+        color: #64748B;
+        margin-bottom: 0.5rem;
+    }
+    
+    .photo-thumbnail {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid #E2E8F0;
+    }
+    
+    .photo-thumbnail:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .card-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .btn {
+        flex: 1;
+        padding: 1rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .btn-approve {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .btn-reject {
+        background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+        color: white;
+    }
+    
+    .btn-view {
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #94A3B8;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .modal.active {
+        display: flex;
+    }
+    
+    .modal-content {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        max-width: 800px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .modal-image {
+        width: 100%;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+    
+    .modal-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #334155;
+        font-weight: 600;
+    }
+    
+    .form-group textarea {
+        width: 100%;
+        padding: 0.875rem;
+        border: 2px solid #E2E8F0;
+        border-radius: 10px;
+        font-size: 1rem;
+        resize: vertical;
+    }
+    
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #14B8A6;
+    }
+    
+    .modal-actions {
+        display: flex;
+        gap: 1rem;
+    }
+</style>
+
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>✅ Verifikasi Mitra</h1>
+        <p>Dashboard untuk memverifikasi aplikasi mitra baru</p>
+    </div>
+    
+    <div class="tabs-container">
+        <div class="tab active" onclick="switchTab('pending')">
+            ⏳ Menunggu Verifikasi ({{ pending_verifications.count }})
+        </div>
+        <div class="tab" onclick="switchTab('approved')">
+            ✅ Disetujui ({{ approved_verifications.count }})
+        </div>
+        <div class="tab" onclick="switchTab('rejected')">
+            ❌ Ditolak ({{ rejected_verifications.count }})
+        </div>
+    </div>
+    
+    <!-- Pending Verifications -->
+    <div class="tab-content active" id="pending-content">
+        <div class="verifications-grid">
+            {% if pending_verifications %}
+                {% for verification in pending_verifications %}
+                <div class="verification-card">
+                    <div class="card-header">
+                        <div class="business-info">
+                            <h3>{{ verification.business_name }}</h3>
+                            <div class="user-info">
+                                👤 {{ verification.full_name }} ({{ verification.user.username }})<br>
+                                📧 {{ verification.user.email }}<br>
+                                📅 Submitted: {{ verification.submitted_at|date:"d M Y H:i" }}
+                            </div>
+                        </div>
+                        <span class="status-badge status-{{ verification.status }}">{{ verification.get_status_display }}</span>
+                    </div>
+                    
+                    <div class="card-grid">
+                        <div class="info-section">
+                            <h4>📋 Data Pribadi</h4>
+                            <div class="info-row">
+                                <span class="info-label">KTP:</span>
+                                <span class="info-value">{{ verification.ktp_number }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Telepon:</span>
+                                <span class="info-value">{{ verification.business_phone }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="info-section">
+                            <h4>🏦 Rekening Bank</h4>
+                            <div class="info-row">
+                                <span class="info-label">Bank:</span>
+                                <span class="info-value">{{ verification.get_bank_name_display }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">No. Rek:</span>
+                                <span class="info-value">{{ verification.bank_account_number }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Atas Nama:</span>
+                                <span class="info-value">{{ verification.bank_account_name }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h4>🏪 Informasi Usaha</h4>
+                        <div class="info-row">
+                            <span class="info-label">Alamat:</span>
+                            <span class="info-value">{{ verification.business_address }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Pengalaman:</span>
+                            <span class="info-value">{{ verification.years_of_experience }} tahun</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Kapasitas Harian:</span>
+                            <span class="info-value">{{ verification.daily_capacity_kg }} kg/hari</span>
+                        </div>
+                    </div>
+                    
+                    <div class="photos-grid">
+                        <div class="photo-item">
+                            <div class="photo-label">KTP</div>
+                            <img src="{{ verification.ktp_image.url }}" 
+                                 class="photo-thumbnail" 
+                                 onclick="openImageModal('{{ verification.ktp_image.url }}', 'Foto KTP')">
+                        </div>
+                        <div class="photo-item">
+                            <div class="photo-label">Selfie + KTP</div>
+                            <img src="{{ verification.selfie_with_ktp.url }}" 
+                                 class="photo-thumbnail" 
+                                 onclick="openImageModal('{{ verification.selfie_with_ktp.url }}', 'Selfie dengan KTP')">
+                        </div>
+                        <div class="photo-item">
+                            <div class="photo-label">Depan Toko</div>
+                            <img src="{{ verification.store_front_photo.url }}" 
+                                 class="photo-thumbnail" 
+                                 onclick="openImageModal('{{ verification.store_front_photo.url }}', 'Foto Depan Toko')">
+                        </div>
+                        <div class="photo-item">
+                            <div class="photo-label">Interior</div>
+                            <img src="{{ verification.store_interior_photo.url }}" 
+                                 class="photo-thumbnail" 
+                                 onclick="openImageModal('{{ verification.store_interior_photo.url }}', 'Foto Interior')">
+                        </div>
+                        {% if verification.equipment_photo %}
+                        <div class="photo-item">
+                            <div class="photo-label">Peralatan</div>
+                            <img src="{{ verification.equipment_photo.url }}" 
+                                 class="photo-thumbnail" 
+                                 onclick="openImageModal('{{ verification.equipment_photo.url }}', 'Foto Peralatan')">
+                        </div>
+                        {% endif %}
+                        <div class="photo-item">
+                            <div class="photo-label">Bukti Rekening</div>
+                            <img src="{{ verification.bank_account_proof.url }}" 
+                                 class="photo-thumbnail photo-trigger" 
+                                 data-image-url="{{ verification.bank_account_proof.url }}"
+                                 data-title="Bukti Rekening">
+                        </div>
+                    </div>
+                    
+                    <div class="card-actions">
+                        <button class="btn btn-approve approve-mitra-btn" data-verification-id="{{ verification.id }}">
+                            ✅ Setujui
+                        </button>
+                        <button class="btn btn-reject reject-mitra-btn" data-verification-id="{{ verification.id }}">
+                            ❌ Tolak
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <h3>Tidak ada verifikasi yang menunggu</h3>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Approved Verifications -->
+    <div class="tab-content" id="approved-content">
+        <div class="verifications-grid">
+            {% if approved_verifications %}
+                {% for verification in approved_verifications %}
+                <div class="verification-card">
+                    <div class="card-header">
+                        <div class="business-info">
+                            <h3>{{ verification.business_name }}</h3>
+                            <div class="user-info">
+                                👤 {{ verification.full_name }}<br>
+                                ✅ Approved: {{ verification.verified_at|date:"d M Y H:i" }}<br>
+                                👨‍💼 By: {{ verification.verified_by.username }}
+                            </div>
+                        </div>
+                        <span class="status-badge status-{{ verification.status }}">{{ verification.get_status_display }}</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="info-label">Bank:</span>
+                        <span class="info-value">{{ verification.get_bank_name_display }} - {{ verification.bank_account_number }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Kapasitas:</span>
+                        <span class="info-value">{{ verification.daily_capacity_kg }} kg/hari</span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <h3>Belum ada mitra yang disetujui</h3>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Rejected Verifications -->
+    <div class="tab-content" id="rejected-content">
+        <div class="verifications-grid">
+            {% if rejected_verifications %}
+                {% for verification in rejected_verifications %}
+                <div class="verification-card">
+                    <div class="card-header">
+                        <div class="business-info">
+                            <h3>{{ verification.business_name }}</h3>
+                            <div class="user-info">
+                                👤 {{ verification.full_name }}<br>
+                                ❌ Rejected: {{ verification.verified_at|date:"d M Y H:i" }}<br>
+                                {% if verification.admin_notes %}
+                                📝 Alasan: {{ verification.admin_notes }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <span class="status-badge status-{{ verification.status }}">{{ verification.get_status_display }}</span>
+                    </div>
+                    
+                    <div class="card-actions">
+                        <button class="btn btn-approve approve-mitra-btn" data-verification-id="{{ verification.id }}">
+                            ✅ Setujui
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <h3>Tidak ada mitra yang ditolak</h3>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="modal" id="imageModal">
+    <button class="modal-close" id="closeImageModalBtn">×</button>
+    <div class="modal-content" id="imageModalContent">
+        <h3 id="modalTitle" style="margin-bottom: 1rem; color: #0F766E;"></h3>
+        <img src="" alt="Preview" class="modal-image" id="modalImage">
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal" id="rejectModal">
+    <button class="modal-close" id="closeRejectModalBtn">×</button>
+    <div class="modal-content" id="rejectModalContent">
+        <h2 style="color: #991B1B; margin-bottom: 1.5rem;">❌ Tolak Verifikasi Mitra</h2>
+        <form id="rejectForm">
+            {% csrf_token %}
+            <input type="hidden" id="rejectVerificationId" name="verification_id">
+            
+            <div class="form-group">
+                <label for="adminNotes">Alasan Penolakan *</label>
+                <textarea id="adminNotes" 
+                          name="admin_notes" 
+                          rows="4" 
+                          required 
+                          placeholder="Contoh: Data KTP tidak jelas, foto toko tidak sesuai, dll."></textarea>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn btn-view" id="cancelRejectBtn">
+                    Batal
+                </button>
+                <button type="submit" class="btn btn-reject">
+                    ❌ Tolak Verifikasi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.getElementById(tabName + '-content').classList.add('active');
+    }
+    
+    // Image Modal Event Listeners
+    document.querySelectorAll('.photo-trigger').forEach(img => {
+        img.addEventListener('click', function() {
+            const imageUrl = this.dataset.imageUrl;
+            const title = this.dataset.title || 'Preview';
+            document.getElementById('modalImage').src = imageUrl;
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('imageModal').classList.add('active');
+        });
+    });
+    
+    document.getElementById('imageModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+        }
+    });
+    
+    document.getElementById('closeImageModalBtn').addEventListener('click', function() {
+        document.getElementById('imageModal').classList.remove('active');
+    });
+    
+    document.getElementById('imageModalContent').addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    
+    // Approve/Reject Button Event Listeners
+    document.querySelectorAll('.approve-mitra-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const verificationId = this.dataset.verificationId;
+            if (confirm('Apakah Anda yakin ingin menyetujui verifikasi ini?')) {
+                verifyMitra(verificationId, 'approve');
+            }
+        });
+    });
+    
+    document.querySelectorAll('.reject-mitra-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const verificationId = this.dataset.verificationId;
+            document.getElementById('rejectVerificationId').value = verificationId;
+            document.getElementById('rejectModal').classList.add('active');
+        });
+    });
+    
+    // Reject Modal Event Listeners
+    document.getElementById('rejectModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+            document.getElementById('rejectForm').reset();
+        }
+    });
+    
+    document.getElementById('closeRejectModalBtn').addEventListener('click', function() {
+        document.getElementById('rejectModal').classList.remove('active');
+        document.getElementById('rejectForm').reset();
+    });
+    
+    document.getElementById('cancelRejectBtn').addEventListener('click', function() {
+        document.getElementById('rejectModal').classList.remove('active');
+        document.getElementById('rejectForm').reset();
+    });
+    
+    document.getElementById('rejectModalContent').addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    
+    function verifyMitra(verificationId, action) {
+        const formData = new FormData();
+        formData.append('action', action);
+        formData.append('csrfmiddlewaretoken', csrftoken);
+        
+        fetch(`/partners/admin/verify-mitra/${verificationId}/`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(action === 'approve' ? 'Verifikasi berhasil disetujui!' : 'Verifikasi berhasil ditolak!');
+                location.reload();
+            } else {
+                alert('Terjadi kesalahan: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat memproses verifikasi');
+        });
+    }
+    
+    document.getElementById('rejectForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const verificationId = document.getElementById('rejectVerificationId').value;
+        const adminNotes = document.getElementById('adminNotes').value;
+        
+        const formData = new FormData();
+        formData.append('action', 'reject');
+        formData.append('admin_notes', adminNotes);
+        formData.append('csrfmiddlewaretoken', csrftoken);
+        
+        fetch(`/partners/admin/verify-mitra/${verificationId}/`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Verifikasi berhasil ditolak!');
+                location.reload();
+            } else {
+                alert('Terjadi kesalahan: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat memproses verifikasi');
+        });
+    });
+</script>
+{% endblock %}

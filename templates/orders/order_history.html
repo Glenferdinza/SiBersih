@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Riwayat Pesanan - SiBersih{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block content %}
+{% include 'components/floating_icons.html' %}
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Riwayat Pesanan</h1>
+        <p>Semua pesanan laundry Anda</p>
+    </div>
+    
+    <div class="recent-orders">
+        {% if orders %}
+        <div class="orders-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>No. Order</th>
+                        <th>Layanan</th>
+                        <th>Jumlah</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th>Tanggal</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>{{ order.order_number }}</td>
+                        <td>{{ order.service.name }}</td>
+                        <td>{{ order.quantity }} {{ order.service.unit }}</td>
+                        <td><span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span></td>
+                        <td>Rp {{ order.total_price|floatformat:0 }}</td>
+                        <td>{{ order.created_at|date:"d M Y, H:i" }}</td>
+                        <td><a href="{% url 'orders:track_order' order.order_number %}" class="btn-small">Lacak</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="empty-state">Belum ada pesanan</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

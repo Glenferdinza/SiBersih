@@ -1,0 +1,664 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - SiBersih{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/animations.css' %}">
+{% endblock %}
+
+{% block content %}
+{% include 'components/floating_icons.html' %}
+
+<style>
+    .admin-dashboard {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #F0FDFA 0%, #ECFEFF 100%);
+        padding: 2rem 0;
+    }
+    
+    .admin-container {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+    
+    .admin-header {
+        background: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        color: white;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .admin-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+    
+    .admin-header-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .admin-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .export-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .btn-export {
+        padding: 0.875rem 1.5rem;
+        border-radius: 12px;
+        border: 2px solid white;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-export:hover {
+        background: white;
+        color: #7C3AED;
+        transform: translateY(-2px);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    
+    .stat-card.users { border-left-color: #3B82F6; }
+    .stat-card.orders { border-left-color: #10B981; }
+    .stat-card.mitras { border-left-color: #F59E0B; }
+    .stat-card.revenue { border-left-color: #8B5CF6; }
+    
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    
+    .stat-icon.users { background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); }
+    .stat-icon.orders { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+    .stat-icon.mitras { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); }
+    .stat-icon.revenue { background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); }
+    
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #0F766E;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+        color: #64748B;
+        font-size: 0.95rem;
+    }
+    
+    .stat-change {
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .stat-change.positive { color: #10B981; }
+    .stat-change.negative { color: #EF4444; }
+    
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .chart-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    
+    .chart-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #F1F5F9;
+    }
+    
+    .chart-title {
+        font-size: 1.3rem;
+        color: #0F766E;
+        font-weight: 700;
+    }
+    
+    .table-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #F1F5F9;
+    }
+    
+    .search-box {
+        padding: 0.75rem 1rem;
+        border: 2px solid #E2E8F0;
+        border-radius: 10px;
+        width: 300px;
+        font-size: 0.95rem;
+    }
+    
+    .search-box:focus {
+        outline: none;
+        border-color: #14B8A6;
+    }
+    
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .data-table th {
+        text-align: left;
+        padding: 1rem;
+        background: #F8FAFC;
+        color: #64748B;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border-bottom: 2px solid #E2E8F0;
+    }
+    
+    .data-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #F1F5F9;
+        color: #334155;
+    }
+    
+    .data-table tr:hover {
+        background: #F8FAFC;
+    }
+    
+    .status-badge {
+        padding: 0.4rem 0.875rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .status-pending { background: #FEF3C7; color: #92400E; }
+    .status-picked_up { background: #DBEAFE; color: #1E3A8A; }
+    .status-processing { background: #BFDBFE; color: #1E40AF; }
+    .status-ready { background: #D1FAE5; color: #065F46; }
+    .status-delivered { background: #D1FAE5; color: #065F46; }
+    .status-cancelled { background: #FEE2E2; color: #991B1B; }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    .page-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid #E2E8F0;
+        background: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .page-btn:hover,
+    .page-btn.active {
+        border-color: #14B8A6;
+        background: #14B8A6;
+        color: white;
+    }
+    
+    .mitra-requests-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+    
+    .request-item {
+        border: 2px solid #F1F5F9;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .request-item:hover {
+        border-color: #14B8A6;
+    }
+    
+    .request-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1rem;
+    }
+    
+    .request-info h3 {
+        color: #0F766E;
+        margin-bottom: 0.5rem;
+    }
+    
+    .request-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+    
+    .btn-approve {
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-approve:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-reject {
+        padding: 0.75rem 1.5rem;
+        background: #FEE2E2;
+        color: #991B1B;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-reject:hover {
+        background: #FEE2E2;
+        transform: translateY(-2px);
+    }
+    
+    @media (max-width: 1200px) {
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .admin-header-content {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .export-buttons {
+            width: 100%;
+        }
+        
+        .btn-export {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="admin-dashboard">
+    <div class="admin-container">
+        <!-- Header -->
+        <div class="admin-header">
+            <div class="admin-header-content">
+                <div>
+                    <h1>⚡ Admin Dashboard</h1>
+                    <p>Kelola dan pantau seluruh sistem SiBersih</p>
+                </div>
+                <div class="export-buttons">
+                    <a href="{% url 'core:export_orders_excel' %}" class="btn-export">
+                        📊 Export Excel
+                    </a>
+                    <a href="{% url 'core:export_orders_csv' %}" class="btn-export">
+                        📄 Export CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card users">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-value">{{ total_users }}</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="stat-icon users">👥</div>
+                </div>
+                <div class="stat-change positive">
+                    ↑ {{ new_users_this_month }} user baru bulan ini
+                </div>
+            </div>
+            
+            <div class="stat-card orders">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-value">{{ total_orders }}</div>
+                        <div class="stat-label">Total Orders</div>
+                    </div>
+                    <div class="stat-icon orders">📦</div>
+                </div>
+                <div class="stat-change positive">
+                    ↑ {{ orders_this_week }} pesanan minggu ini
+                </div>
+            </div>
+            
+            <div class="stat-card mitras">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-value">{{ total_mitras }}</div>
+                        <div class="stat-label">Total Mitra</div>
+                    </div>
+                    <div class="stat-icon mitras">🏪</div>
+                </div>
+                <div class="stat-change">
+                    {{ pending_requests }} pending approval
+                </div>
+            </div>
+            
+            <div class="stat-card revenue">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-value" style="font-size: 1.8rem;">Rp {{ total_revenue|floatformat:0 }}</div>
+                        <div class="stat-label">Total Revenue</div>
+                    </div>
+                    <div class="stat-icon revenue">💰</div>
+                </div>
+                <div class="stat-change positive">
+                    ↑ Rp {{ platform_fees|floatformat:0 }} platform fees
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mitra Requests -->
+        {% if mitra_requests %}
+        <div class="mitra-requests-card">
+            <div class="table-header">
+                <h2 class="chart-title">📋 Pending Mitra Requests</h2>
+            </div>
+            
+            {% for request in mitra_requests %}
+            <div class="request-item">
+                <div class="request-header">
+                    <div class="request-info">
+                        <h3>{{ request.business_name }}</h3>
+                        <p style="color: #64748B;">{{ request.user.get_full_name }} - {{ request.user.email }}</p>
+                        <p style="color: #64748B; font-size: 0.9rem; margin-top: 0.5rem;">
+                            📍 {{ request.address }}<br>
+                            📞 {{ request.phone_number }}
+                        </p>
+                    </div>
+                    <div class="request-actions">
+                        <button class="btn-approve" data-request-id="{{ request.id }}">
+                            ✅ Approve
+                        </button>
+                        <button class="btn-reject" data-request-id="{{ request.id }}">
+                            ❌ Reject
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2 class="chart-title">📈 Revenue Trend (7 Hari Terakhir)</h2>
+                </div>
+                <canvas id="revenueChart"></canvas>
+            </div>
+            
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2 class="chart-title">📊 Order Status</h2>
+                </div>
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Orders Table -->
+        <div class="table-card">
+            <div class="table-header">
+                <h2 class="chart-title">📦 Recent Orders</h2>
+                <input type="text" class="search-box" placeholder="Search orders..." id="searchBox" onkeyup="searchOrders()">
+            </div>
+            
+            <table class="data-table" id="ordersTable">
+                <thead>
+                    <tr>
+                        <th>Order Number</th>
+                        <th>User</th>
+                        <th>Laundry</th>
+                        <th>Weight</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td><strong>#{{ order.order_number }}</strong></td>
+                        <td>{{ order.user.get_full_name }}</td>
+                        <td>{{ order.laundry.name }}</td>
+                        <td>{{ order.weight_kg }} kg</td>
+                        <td><strong>Rp {{ order.total_price|floatformat:0 }}</strong></td>
+                        <td><span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span></td>
+                        <td>{{ order.created_at|date:"d M Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Chart Data -->
+<script id="revenue-chart-data" type="application/json">
+{
+    "labels": {{ revenue_labels|safe }},
+    "data": {{ revenue_data|safe }}
+}
+</script>
+<script id="orders-chart-data" type="application/json">
+{
+    "labels": {{ orders_labels|safe }},
+    "data": {{ orders_data|safe }}
+}
+</script>
+<script id="status-chart-data" type="application/json">
+{{ status_counts|safe }}
+</script>
+
+<script>
+    // Load chart data
+    const revenueChartData = JSON.parse(document.getElementById('revenue-chart-data').textContent);
+    const ordersChartData = JSON.parse(document.getElementById('orders-chart-data').textContent);
+    const statusChartData = JSON.parse(document.getElementById('status-chart-data').textContent);
+    
+    // Revenue Chart
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: revenueChartData.labels,
+            datasets: [{
+                label: 'Revenue (Rp)',
+                data: revenueChartData.data,
+                borderColor: '#14B8A6',
+                backgroundColor: 'rgba(20, 184, 166, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'Rp ' + value.toLocaleString('id-ID');
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Status Chart
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    const statusChart = new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pending', 'Picked Up', 'Processing', 'Ready', 'Delivered', 'Cancelled'],
+            datasets: [{
+                data: statusChartData,
+                backgroundColor: [
+                    '#FFA500',
+                    '#3B82F6',
+                    '#2563EB',
+                    '#10B981',
+                    '#059669',
+                    '#EF4444'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    function searchOrders() {
+        const input = document.getElementById('searchBox');
+        const filter = input.value.toUpperCase();
+        const table = document.getElementById('ordersTable');
+        const tr = table.getElementsByTagName('tr');
+        
+        for (let i = 1; i < tr.length; i++) {
+            let txtValue = tr[i].textContent || tr[i].innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = '';
+            } else {
+                tr[i].style.display = 'none';
+            }
+        }
+    }
+    
+    // Mitra approval handlers
+    document.addEventListener('DOMContentLoaded', function() {
+        // Approve buttons
+        document.querySelectorAll('.btn-approve').forEach(button => {
+            button.addEventListener('click', function() {
+                const requestId = this.dataset.requestId;
+                if (confirm('Approve this mitra request?')) {
+                    // TODO: Implement approve API
+                    alert('Approve functionality will be implemented');
+                }
+            });
+        });
+        
+        // Reject buttons
+        document.querySelectorAll('.btn-reject').forEach(button => {
+            button.addEventListener('click', function() {
+                const requestId = this.dataset.requestId;
+                if (confirm('Reject this mitra request?')) {
+                    // TODO: Implement reject API
+                    alert('Reject functionality will be implemented');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

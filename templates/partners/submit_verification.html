@@ -1,0 +1,596 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Verifikasi Mitra - SiBersih{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #F0FDFA 0%, #ECFEFF 100%);
+        min-height: 100vh;
+    }
+
+    .verification-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+    
+    .verification-header {
+        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        color: white;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .verification-header h1 {
+        font-size: 2rem;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .steps-container {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 3rem;
+        position: relative;
+    }
+    
+    .steps-container::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #E2E8F0;
+        z-index: 0;
+    }
+    
+    .step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        border: 2px solid #E2E8F0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        font-weight: 700;
+        color: #94A3B8;
+        transition: all 0.3s ease;
+    }
+    
+    .step.active .step-number {
+        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        border-color: #14B8A6;
+        color: white;
+    }
+    
+    .step.completed .step-number {
+        background: #10B981;
+        border-color: #10B981;
+        color: white;
+    }
+    
+    .step-label {
+        font-size: 0.875rem;
+        color: #64748B;
+        font-weight: 500;
+    }
+    
+    .step.active .step-label {
+        color: #0F766E;
+        font-weight: 600;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+    
+    .form-step {
+        display: none;
+    }
+    
+    .form-step.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .step-title {
+        color: #0F766E;
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .step-description {
+        color: #64748B;
+        margin-bottom: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #334155;
+        font-weight: 600;
+    }
+    
+    .required {
+        color: #EF4444;
+    }
+    
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group input[type="tel"],
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 0.875rem;
+        border: 2px solid #E2E8F0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #14B8A6;
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+    }
+    
+    .file-upload-area {
+        border: 2px dashed #CBD5E1;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        background: #F8FAFC;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .file-upload-area:hover {
+        border-color: #14B8A6;
+        background: rgba(20, 184, 166, 0.02);
+    }
+    
+    .file-upload-area.has-file {
+        border-color: #10B981;
+        background: #ECFDF5;
+    }
+    
+    .file-icon {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .file-input {
+        display: none;
+    }
+    
+    .file-name {
+        color: #0F766E;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+    
+    .image-preview {
+        max-width: 200px;
+        max-height: 150px;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+    
+    .form-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .btn {
+        flex: 1;
+        padding: 1rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-next,
+    .btn-submit {
+        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        color: white;
+    }
+    
+    .btn-prev {
+        background: #F1F5F9;
+        color: #64748B;
+    }
+    
+    .btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .info-box {
+        background: #FEF3C7;
+        border-left: 4px solid #F59E0B;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .info-box p {
+        color: #92400E;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+    
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="verification-container">
+    <div class="verification-header">
+        <h1>✅ Verifikasi Mitra</h1>
+        <p>Lengkapi formulir verifikasi untuk menjadi mitra SiBersih</p>
+    </div>
+    
+    <!-- Progress Steps -->
+    <div class="steps-container">
+        <div class="step active" id="step-indicator-1">
+            <div class="step-number">1</div>
+            <div class="step-label">Data Pribadi</div>
+        </div>
+        <div class="step" id="step-indicator-2">
+            <div class="step-number">2</div>
+            <div class="step-label">Data Usaha</div>
+        </div>
+        <div class="step" id="step-indicator-3">
+            <div class="step-number">3</div>
+            <div class="step-label">Rekening Bank</div>
+        </div>
+        <div class="step" id="step-indicator-4">
+            <div class="step-number">4</div>
+            <div class="step-label">Informasi Tambahan</div>
+        </div>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data" id="verificationForm">
+        {% csrf_token %}
+        
+        <!-- Step 1: Personal Identity -->
+        <div class="form-step active" id="step-1">
+            <div class="form-card">
+                <h2 class="step-title">📋 Data Pribadi</h2>
+                <p class="step-description">Lengkapi data pribadi sesuai dengan KTP Anda</p>
+                
+                <div class="info-box">
+                    <p>💡 Pastikan data yang Anda masukkan sesuai dengan KTP. Data ini akan diverifikasi oleh tim kami.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label>Nama Lengkap (sesuai KTP) <span class="required">*</span></label>
+                    <input type="text" name="full_name" required placeholder="Contoh: Ahmad Wijaya">
+                </div>
+                
+                <div class="form-group">
+                    <label>Nomor KTP <span class="required">*</span></label>
+                    <input type="text" name="ktp_number" required maxlength="16" pattern="[0-9]{16}" placeholder="16 digit nomor KTP">
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Foto KTP <span class="required">*</span></label>
+                        <div class="file-upload-area" onclick="document.getElementById('ktp_image').click()">
+                            <div class="file-icon">📷</div>
+                            <p>Klik untuk upload foto KTP</p>
+                            <small style="color: #64748B;">Format: JPG, PNG (max 5MB)</small>
+                            <div class="file-name" id="ktp-filename"></div>
+                            <img id="ktp-preview" class="image-preview" style="display: none;">
+                        </div>
+                        <input type="file" id="ktp_image" name="ktp_image" class="file-input" accept="image/*" required onchange="previewImage(this, 'ktp-preview', 'ktp-filename')">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Foto Selfie dengan KTP <span class="required">*</span></label>
+                        <div class="file-upload-area" onclick="document.getElementById('selfie_with_ktp').click()">
+                            <div class="file-icon">🤳</div>
+                            <p>Klik untuk upload selfie + KTP</p>
+                            <small style="color: #64748B;">Format: JPG, PNG (max 5MB)</small>
+                            <div class="file-name" id="selfie-filename"></div>
+                            <img id="selfie-preview" class="image-preview" style="display: none;">
+                        </div>
+                        <input type="file" id="selfie_with_ktp" name="selfie_with_ktp" class="file-input" accept="image/*" required onchange="previewImage(this, 'selfie-preview', 'selfie-filename')">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-buttons">
+                <button type="button" class="btn btn-next" onclick="nextStep(2)">Selanjutnya →</button>
+            </div>
+        </div>
+        
+        <!-- Step 2: Business Information -->
+        <div class="form-step" id="step-2">
+            <div class="form-card">
+                <h2 class="step-title">🏪 Data Usaha Laundry</h2>
+                <p class="step-description">Informasi tentang usaha laundry Anda</p>
+                
+                <div class="form-group">
+                    <label>Nama Usaha Laundry <span class="required">*</span></label>
+                    <input type="text" name="business_name" required placeholder="Contoh: Laundry Bersih Cepat">
+                </div>
+                
+                <div class="form-group">
+                    <label>Alamat Usaha Lengkap <span class="required">*</span></label>
+                    <textarea name="business_address" rows="3" required placeholder="Jl. Contoh No. 123, Kelurahan, Kecamatan, Kota, Provinsi"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Nomor Telepon Usaha <span class="required">*</span></label>
+                    <input type="tel" name="business_phone" required pattern="[0-9]{10,13}" placeholder="081234567890">
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Foto Depan Toko <span class="required">*</span></label>
+                        <div class="file-upload-area" onclick="document.getElementById('store_front_photo').click()">
+                            <div class="file-icon">🏪</div>
+                            <p>Upload foto tampak depan toko</p>
+                            <div class="file-name" id="front-filename"></div>
+                            <img id="front-preview" class="image-preview" style="display: none;">
+                        </div>
+                        <input type="file" id="store_front_photo" name="store_front_photo" class="file-input" accept="image/*" required onchange="previewImage(this, 'front-preview', 'front-filename')">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Foto Interior Toko <span class="required">*</span></label>
+                        <div class="file-upload-area" onclick="document.getElementById('store_interior_photo').click()">
+                            <div class="file-icon">🏢</div>
+                            <p>Upload foto bagian dalam toko</p>
+                            <div class="file-name" id="interior-filename"></div>
+                            <img id="interior-preview" class="image-preview" style="display: none;">
+                        </div>
+                        <input type="file" id="store_interior_photo" name="store_interior_photo" class="file-input" accept="image/*" required onchange="previewImage(this, 'interior-preview', 'interior-filename')">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Foto Peralatan Laundry (Opsional)</label>
+                    <div class="file-upload-area" onclick="document.getElementById('equipment_photo').click()">
+                        <div class="file-icon">🧺</div>
+                        <p>Upload foto mesin cuci / peralatan</p>
+                        <div class="file-name" id="equipment-filename"></div>
+                        <img id="equipment-preview" class="image-preview" style="display: none;">
+                    </div>
+                    <input type="file" id="equipment_photo" name="equipment_photo" class="file-input" accept="image/*" onchange="previewImage(this, 'equipment-preview', 'equipment-filename')">
+                </div>
+            </div>
+            
+            <div class="form-buttons">
+                <button type="button" class="btn btn-prev" onclick="prevStep(1)">← Sebelumnya</button>
+                <button type="button" class="btn btn-next" onclick="nextStep(3)">Selanjutnya →</button>
+            </div>
+        </div>
+        
+        <!-- Step 3: Bank Account -->
+        <div class="form-step" id="step-3">
+            <div class="form-card">
+                <h2 class="step-title">🏦 Informasi Rekening Bank</h2>
+                <p class="step-description">Data rekening untuk transfer pembayaran dari pesanan</p>
+                
+                <div class="info-box">
+                    <p>💡 Rekening ini akan digunakan untuk transfer hasil pesanan. Pastikan rekening aktif dan atas nama pemilik usaha.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label>Nama Bank <span class="required">*</span></label>
+                    <select name="bank_name" required>
+                        <option value="">-- Pilih Bank --</option>
+                        <option value="bri">Bank BRI</option>
+                        <option value="bca">Bank BCA</option>
+                        <option value="mandiri">Bank Mandiri</option>
+                        <option value="bni">Bank BNI</option>
+                        <option value="seabank">SeaBank</option>
+                        <option value="other">Lainnya</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Nomor Rekening <span class="required">*</span></label>
+                    <input type="text" name="bank_account_number" required pattern="[0-9]+" placeholder="1234567890">
+                </div>
+                
+                <div class="form-group">
+                    <label>Nama Pemilik Rekening <span class="required">*</span></label>
+                    <input type="text" name="bank_account_name" required placeholder="Sesuai buku tabungan">
+                </div>
+                
+                <div class="form-group">
+                    <label>Foto Buku Tabungan / Bukti Rekening <span class="required">*</span></label>
+                    <div class="file-upload-area" onclick="document.getElementById('bank_account_proof').click()">
+                        <div class="file-icon">💳</div>
+                        <p>Upload foto halaman pertama buku tabungan</p>
+                        <small style="color: #64748B;">Foto harus jelas dan menampilkan nomor rekening & nama pemilik</small>
+                        <div class="file-name" id="bank-filename"></div>
+                        <img id="bank-preview" class="image-preview" style="display: none;">
+                    </div>
+                    <input type="file" id="bank_account_proof" name="bank_account_proof" class="file-input" accept="image/*" required onchange="previewImage(this, 'bank-preview', 'bank-filename')">
+                </div>
+            </div>
+            
+            <div class="form-buttons">
+                <button type="button" class="btn btn-prev" onclick="prevStep(2)">← Sebelumnya</button>
+                <button type="button" class="btn btn-next" onclick="nextStep(4)">Selanjutnya →</button>
+            </div>
+        </div>
+        
+        <!-- Step 4: Additional Information -->
+        <div class="form-step" id="step-4">
+            <div class="form-card">
+                <h2 class="step-title">📝 Informasi Tambahan</h2>
+                <p class="step-description">Informasi pendukung tentang pengalaman dan kapasitas usaha Anda</p>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Pengalaman (Tahun) <span class="required">*</span></label>
+                        <input type="number" name="years_of_experience" min="0" max="50" value="1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Kapasitas Harian (KG) <span class="required">*</span></label>
+                        <input type="number" name="daily_capacity_kg" step="0.1" min="10" max="1000" value="50" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Catatan Tambahan (Opsional)</label>
+                    <textarea name="additional_notes" rows="4" placeholder="Contoh: Layanan express tersedia, menerima pesanan hotel, dll."></textarea>
+                </div>
+                
+                <div class="info-box">
+                    <p>✅ Pastikan semua data yang Anda masukkan sudah benar. Verifikasi akan dilakukan maksimal 3x24 jam setelah submit.</p>
+                </div>
+            </div>
+            
+            <div class="form-buttons">
+                <button type="button" class="btn btn-prev" onclick="prevStep(3)">← Sebelumnya</button>
+                <button type="submit" class="btn btn-submit">✅ Submit Verifikasi</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    let currentStep = 1;
+    
+    function nextStep(step) {
+        // Validate current step before moving
+        const currentStepElement = document.getElementById(`step-${currentStep}`);
+        const inputs = currentStepElement.querySelectorAll('input[required], textarea[required], select[required]');
+        
+        let isValid = true;
+        inputs.forEach(input => {
+            if (!input.value) {
+                isValid = false;
+                input.style.borderColor = '#EF4444';
+            } else {
+                input.style.borderColor = '#E2E8F0';
+            }
+        });
+        
+        if (!isValid) {
+            alert('Harap lengkapi semua field yang wajib diisi (*)');
+            return;
+        }
+        
+        // Hide current step
+        document.getElementById(`step-${currentStep}`).classList.remove('active');
+        document.getElementById(`step-indicator-${currentStep}`).classList.remove('active');
+        document.getElementById(`step-indicator-${currentStep}`).classList.add('completed');
+        
+        // Show next step
+        currentStep = step;
+        document.getElementById(`step-${currentStep}`).classList.add('active');
+        document.getElementById(`step-indicator-${currentStep}`).classList.add('active');
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    function prevStep(step) {
+        // Hide current step
+        document.getElementById(`step-${currentStep}`).classList.remove('active');
+        document.getElementById(`step-indicator-${currentStep}`).classList.remove('active');
+        
+        // Show previous step
+        currentStep = step;
+        document.getElementById(`step-${currentStep}`).classList.add('active');
+        document.getElementById(`step-indicator-${currentStep}`).classList.remove('completed');
+        document.getElementById(`step-indicator-${currentStep}`).classList.add('active');
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    function previewImage(input, previewId, filenameId) {
+        const file = input.files[0];
+        if (file) {
+            // Check file size
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Ukuran file terlalu besar. Maksimal 5MB.');
+                input.value = '';
+                return;
+            }
+            
+            // Show filename
+            document.getElementById(filenameId).textContent = '📄 ' + file.name;
+            
+            // Show preview for images
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById(previewId);
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            // Mark upload area as has file
+            input.closest('.file-upload-area').classList.add('has-file');
+        }
+    }
+    
+    // Form validation on submit
+    document.getElementById('verificationForm').addEventListener('submit', function(e) {
+        if (!confirm('Apakah Anda yakin semua data sudah benar? Data yang sudah disubmit tidak dapat diubah.')) {
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}

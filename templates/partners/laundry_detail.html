@@ -1,0 +1,1122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ laundry.name }} - SiBersih{% endblock %}
+
+{% block navbar %}
+    {% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/animations.css' %}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    body {
+        background: #f8fafc;
+    }
+
+    .laundry-detail-wrapper {
+        padding: 90px 20px 40px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+        background: white;
+        padding: 15px 25px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .breadcrumb a {
+        color: #14b8a6;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .breadcrumb svg {
+        width: 14px;
+        height: 14px;
+        fill: #94a3b8;
+    }
+
+    .breadcrumb span {
+        color: #64748b;
+    }
+
+    /* Main Grid Layout */
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 25px;
+    }
+
+    /* Left Column */
+    .detail-main {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    /* Gallery Section */
+    .gallery-section {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .main-image {
+        width: 100%;
+        height: 500px;
+        object-fit: cover;
+        background: linear-gradient(135deg, #f1f5f9 0%, #e5e7eb 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .main-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .main-image svg {
+        width: 100px;
+        height: 100px;
+        fill: #cbd5e1;
+    }
+
+    .image-badge {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(0,0,0,0.7);
+        backdrop-filter: blur(10px);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .image-badge svg {
+        width: 16px;
+        height: 16px;
+        fill: white;
+    }
+
+    .thumbnail-strip {
+        display: flex;
+        gap: 10px;
+        padding: 15px;
+        overflow-x: auto;
+        background: #f8fafc;
+    }
+
+    .thumbnail {
+        width: 100px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+        flex-shrink: 0;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .thumbnail:hover,
+    .thumbnail.active {
+        border-color: #14b8a6;
+    }
+
+    .thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Info Section */
+    .info-section {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .laundry-header {
+        margin-bottom: 25px;
+        padding-bottom: 25px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .laundry-name {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 15px;
+    }
+
+    .laundry-meta {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #64748b;
+        font-size: 0.95rem;
+    }
+
+    .meta-item svg {
+        width: 18px;
+        height: 18px;
+        fill: #94a3b8;
+    }
+
+    .meta-item.rating {
+        color: #f59e0b;
+        font-weight: 700;
+    }
+
+    .meta-item.rating svg {
+        fill: #f59e0b;
+    }
+
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-badge.buka {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #065f46;
+    }
+
+    .status-badge.tutup {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #991b1b;
+    }
+
+    /* Pricing */
+    .pricing-box {
+        background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+        border: 2px solid #99f6e4;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+
+    .price-label {
+        color: #0d9488;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .price-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 5px;
+    }
+
+    .price-unit {
+        color: #64748b;
+        font-size: 1rem;
+    }
+
+    .min-order {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 2px dashed #99f6e4;
+        color: #0d9488;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    /* Services Grid */
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .service-card {
+        background: #f8fafc;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .service-card.active {
+        background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+        border-color: #14b8a6;
+    }
+
+    .service-card.active .service-icon {
+        background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+    }
+
+    .service-card.active .service-icon svg {
+        fill: white;
+    }
+
+    .service-icon {
+        width: 50px;
+        height: 50px;
+        background: #e5e7eb;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px;
+    }
+
+    .service-icon svg {
+        width: 24px;
+        height: 24px;
+        fill: #64748b;
+    }
+
+    .service-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #0f172a;
+    }
+
+    /* Operating Hours */
+    .hours-box {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+
+    .hours-title {
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .hours-title svg {
+        width: 20px;
+        height: 20px;
+        fill: #14b8a6;
+    }
+
+    .hours-grid {
+        display: grid;
+        gap: 12px;
+    }
+
+    .hour-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background: white;
+        border-radius: 8px;
+    }
+
+    .hour-label {
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .hour-value {
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    /* Location Map */
+    .location-section {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .section-header svg {
+        width: 24px;
+        height: 24px;
+        fill: #14b8a6;
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    #map {
+        width: 100%;
+        height: 350px;
+        border-radius: 15px;
+        margin-bottom: 15px;
+    }
+
+    .address-text {
+        color: #64748b;
+        line-height: 1.6;
+        display: flex;
+        align-items: start;
+        gap: 10px;
+    }
+
+    .address-text svg {
+        width: 18px;
+        height: 18px;
+        fill: #14b8a6;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    /* Reviews Section */
+    .reviews-section {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .rating-summary {
+        background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 30px;
+    }
+
+    .overall-rating {
+        text-align: center;
+    }
+
+    .rating-number {
+        font-size: 4rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1;
+        margin-bottom: 10px;
+    }
+
+    .rating-stars {
+        display: flex;
+        gap: 5px;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+
+    .rating-stars svg {
+        width: 24px;
+        height: 24px;
+        fill: #f59e0b;
+    }
+
+    .rating-count {
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .rating-breakdown {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .rating-bar-item {
+        display: grid;
+        grid-template-columns: 80px 1fr 60px;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .bar-label {
+        color: #64748b;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .bar-label svg {
+        width: 14px;
+        height: 14px;
+        fill: #f59e0b;
+    }
+
+    .bar-track {
+        background: #e5e7eb;
+        height: 8px;
+        border-radius: 50px;
+        overflow: hidden;
+    }
+
+    .bar-fill {
+        background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+        height: 100%;
+        border-radius: 50px;
+        transition: width 0.5s ease;
+    }
+
+    .bar-value {
+        text-align: right;
+        color: #0f172a;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    /* Review Cards */
+    .reviews-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .review-card {
+        background: #f8fafc;
+        border: 2px solid #e5e7eb;
+        border-radius: 15px;
+        padding: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .review-card:hover {
+        border-color: #14b8a6;
+        background: white;
+    }
+
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 15px;
+    }
+
+    .reviewer-info {
+        display: flex;
+        gap: 12px;
+    }
+
+    .reviewer-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .reviewer-details {
+        flex-grow: 1;
+    }
+
+    .reviewer-name {
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 5px;
+    }
+
+    .review-date {
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+
+    .review-rating {
+        display: flex;
+        gap: 3px;
+    }
+
+    .review-rating svg {
+        width: 16px;
+        height: 16px;
+        fill: #f59e0b;
+    }
+
+    .review-comment {
+        color: #475569;
+        line-height: 1.6;
+        margin-bottom: 15px;
+    }
+
+    .review-photos {
+        display: flex;
+        gap: 10px;
+    }
+
+    .review-photo {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .review-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Right Sidebar */
+    .booking-sidebar {
+        position: sticky;
+        top: 100px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .booking-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 2px solid #e5e7eb;
+    }
+
+    .booking-price {
+        text-align: center;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 2px dashed #e5e7eb;
+    }
+
+    .booking-price-label {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+
+    .booking-price-value {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .booking-price-unit {
+        font-size: 1rem;
+        color: #64748b;
+    }
+
+    .btn-order {
+        width: 100%;
+        padding: 18px;
+        background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-decoration: none;
+    }
+
+    .btn-order:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(20, 184, 166, 0.6);
+    }
+
+    .btn-order svg {
+        width: 22px;
+        height: 22px;
+        fill: white;
+    }
+
+    .quick-info {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px dashed #e5e7eb;
+    }
+
+    .quick-info-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .quick-info-item svg {
+        width: 18px;
+        height: 18px;
+        fill: #14b8a6;
+    }
+
+    .empty-reviews {
+        text-align: center;
+        padding: 60px 20px;
+        color: #94a3b8;
+    }
+
+    .empty-reviews svg {
+        width: 80px;
+        height: 80px;
+        fill: #cbd5e1;
+        margin-bottom: 15px;
+    }
+
+    @media (max-width: 1024px) {
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .booking-sidebar {
+            position: static;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .laundry-detail-wrapper {
+            padding: 80px 15px 30px;
+        }
+
+        .main-image {
+            height: 300px;
+        }
+
+        .services-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .rating-summary {
+            grid-template-columns: 1fr;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include 'components/floating_icons.html' %}
+
+<div class="laundry-detail-wrapper">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="{% url 'core:dashboard' %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+            Kembali ke Dashboard
+        </a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"/>
+        </svg>
+        <span>{{ laundry.name }}</span>
+    </div>
+
+    <div class="detail-grid">
+        <!-- Left Column -->
+        <div class="detail-main">
+            <!-- Gallery -->
+            <div class="gallery-section">
+                <div class="main-image" id="mainImage">
+                    {% if laundry.images.first %}
+                    <img src="{{ laundry.images.first.image.url }}" alt="{{ laundry.name }}">
+                    {% else %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <path d="M21 15l-5-5L5 21"/>
+                    </svg>
+                    {% endif %}
+                    <div class="image-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <path d="M21 15l-5-5L5 21"/>
+                        </svg>
+                        {{ laundry.images.count }} Foto
+                    </div>
+                </div>
+
+                <!-- Mitra description / product description -->
+                {% if laundry.mitra and laundry.mitra.description %}
+                <div style="margin: 18px 0; color: #475569; line-height: 1.6;">
+                    <strong>Deskripsi:</strong>
+                    <p style="margin-top: 8px;">{{ laundry.mitra.description }}</p>
+                </div>
+                {% endif %}
+                {% if laundry.images.count > 1 %}
+                <div class="thumbnail-strip">
+                    {% for image in laundry.images.all %}
+                    <div class="thumbnail {% if forloop.first %}active{% endif %}" onclick="changeMainImage('{{ image.image.url }}', this)">
+                        <img src="{{ image.image.url }}" alt="{{ laundry.name }}">
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Info -->
+            <div class="info-section">
+                <div class="laundry-header">
+                    <h1 class="laundry-name">{{ laundry.name }}</h1>
+                    <div class="laundry-meta">
+                        <div class="meta-item rating">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                            {% if laundry.rating > 0 %}
+                            {{ laundry.rating }} ({{ laundry.total_reviews }} review)
+                            {% else %}
+                            Belum ada review
+                            {% endif %}
+                        </div>
+                        <div class="meta-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            {{ laundry.district }}, {{ laundry.city }}
+                        </div>
+                        <div class="meta-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            {% if distance %}
+                                ~{{ distance|floatformat:1 }} km dari lokasi Anda
+                            {% else %}
+                                Jarak belum tersedia
+                            {% endif %}
+                        </div>
+                        <div class="status-badge {{ laundry.status }}">
+                            {{ laundry.get_status_display }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing -->
+                <div class="pricing-box">
+                    <div class="price-label">Harga per Kilogram</div>
+                    <div class="price-value">
+                        Rp {{ laundry.price_per_kg|floatformat:0 }}
+                        <span class="price-unit">/kg</span>
+                    </div>
+                    <div class="min-order">
+                        Minimum order: {{ laundry.min_order_kg }} kg
+                    </div>
+                </div>
+
+                <!-- Quick choose button in main column -->
+                <div style="margin-top: 18px;">
+                    <a href="{% url 'orders:create_order' %}?laundry={{ laundry.id }}" class="btn-order" style="display:inline-block; width:100%; text-align:center;">
+                        Pilih Laundry Ini
+                    </a>
+                </div>
+
+                <!-- Services Available -->
+                <div class="services-grid">
+                    <div class="service-card {% if laundry.has_regular_wash %}active{% endif %}">
+                        <div class="service-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
+                            </svg>
+                        </div>
+                        <div class="service-name">Cuci Setrika</div>
+                    </div>
+                    <div class="service-card {% if laundry.has_dry_clean %}active{% endif %}">
+                        <div class="service-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+                            </svg>
+                        </div>
+                        <div class="service-name">Dry Clean</div>
+                    </div>
+                    <div class="service-card {% if laundry.has_express %}active{% endif %}">
+                        <div class="service-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                            </svg>
+                        </div>
+                        <div class="service-name">Express</div>
+                    </div>
+                </div>
+
+                <!-- Operating Hours -->
+                <div class="hours-box">
+                    <div class="hours-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        Jam Operasional & Estimasi Waktu
+                    </div>
+                    <div class="hours-grid">
+                        <div class="hour-item">
+                            <span class="hour-label">Jam Buka</span>
+                            <span class="hour-value">{{ laundry.operating_hours_start }} - {{ laundry.operating_hours_end }} WIB</span>
+                        </div>
+                        <div class="hour-item">
+                            <span class="hour-label">Estimasi Penjemputan</span>
+                            <span class="hour-value">~{{ laundry.estimated_pickup_time }} menit</span>
+                        </div>
+                        <div class="hour-item">
+                            <span class="hour-label">Estimasi Pengerjaan</span>
+                            <span class="hour-value">~{{ estimated_delivery_hours }} jam</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Map -->
+            <div class="location-section">
+                <div class="section-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    <h2 class="section-title">Lokasi</h2>
+                </div>
+                <div id="map" 
+                     data-lat="{{ laundry.latitude|default:'' }}" 
+                     data-lng="{{ laundry.longitude|default:'' }}"
+                     data-name="{{ laundry.name }}"
+                     data-address="{{ laundry.address }}"></div>
+                <p class="address-text">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    {{ laundry.address }}
+                </p>
+            </div>
+
+            <!-- Reviews -->
+            <div class="reviews-section">
+                <div class="section-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                    <h2 class="section-title">Ulasan Pelanggan</h2>
+                </div>
+
+                {% if laundry.reviews.count > 0 %}
+                <!-- Rating Summary -->
+                <div class="rating-summary">
+                    <div class="overall-rating">
+                        <div class="rating-number">{{ laundry.rating }}</div>
+                        <div class="rating-stars">
+                            {% for i in "12345" %}
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                            {% endfor %}
+                        </div>
+                        <div class="rating-count">{{ laundry.total_reviews }} Ulasan</div>
+                    </div>
+                    <div class="rating-breakdown">
+                        {% for star in rating_breakdown %}
+                        <div class="rating-bar-item">
+                            <div class="bar-label">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                </svg>
+                                {{ star.rating }} Bintang
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill" data-width="{{ star.percentage }}"></div>
+                            </div>
+                            <div class="bar-value">{{ star.count }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <script>
+                // Set rating bar widths from data attributes
+                document.querySelectorAll('.bar-fill').forEach(function(bar) {
+                    var width = bar.getAttribute('data-width');
+                    if (width) {
+                        bar.style.width = width + '%';
+                    }
+                });
+                </script>
+
+                <!-- Reviews List -->
+                <div class="reviews-list">
+                    {% for review in reviews %}
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <div class="reviewer-avatar">
+                                    {{ review.user.username|slice:":1"|upper }}
+                                </div>
+                                <div class="reviewer-details">
+                                    <div class="reviewer-name">{{ review.user.get_full_name|default:review.user.username }}</div>
+                                    <div class="review-date">{{ review.created_at|date:"d M Y" }}</div>
+                                </div>
+                            </div>
+                            <div class="review-rating">
+                                {% for i in "12345" %}
+                                {% if i|add:"0" <= review.rating %}
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                </svg>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <p class="review-comment">{{ review.comment }}</p>
+                        {% if review.photo1 or review.photo2 or review.photo3 %}
+                        <div class="review-photos">
+                            {% if review.photo1 %}
+                            <div class="review-photo">
+                                <img src="{{ review.photo1.url }}" alt="Review photo">
+                            </div>
+                            {% endif %}
+                            {% if review.photo2 %}
+                            <div class="review-photo">
+                                <img src="{{ review.photo2.url }}" alt="Review photo">
+                            </div>
+                            {% endif %}
+                            {% if review.photo3 %}
+                            <div class="review-photo">
+                                <img src="{{ review.photo3.url }}" alt="Review photo">
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-reviews">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
+                    </svg>
+                    <h3>Belum Ada Ulasan</h3>
+                    <p>Jadilah yang pertama memberikan ulasan untuk laundry ini!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="booking-sidebar">
+            <div class="booking-card">
+                <div class="booking-price">
+                    <div class="booking-price-label">Mulai dari</div>
+                    <div class="booking-price-value">
+                        Rp {{ laundry.price_per_kg|floatformat:0 }}
+                        <span class="booking-price-unit">/kg</span>
+                    </div>
+                </div>
+                <a href="{% url 'orders:create_order' %}?laundry={{ laundry.id }}" class="btn-order">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                    Pesan Sekarang
+                </a>
+                <div class="quick-info">
+                    <div class="quick-info-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Gratis jemput & antar
+                    </div>
+                    <div class="quick-info-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Estimasi {{ estimated_delivery_hours }} jam
+                    </div>
+                    <div class="quick-info-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                        </svg>
+                        Bayar saat laundry selesai
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+function changeMainImage(imageUrl, thumbnail) {
+    const mainImage = document.querySelector('#mainImage img');
+    if (mainImage) {
+        mainImage.src = imageUrl;
+    }
+    
+    // Update active thumbnail
+    document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+    thumbnail.classList.add('active');
+}
+
+// Initialize Map
+var mapElement = document.getElementById('map');
+if (mapElement) {
+    var lat = parseFloat(mapElement.getAttribute('data-lat'));
+    var lng = parseFloat(mapElement.getAttribute('data-lng'));
+    var laundryName = mapElement.getAttribute('data-name');
+    var laundryAddress = mapElement.getAttribute('data-address');
+    
+    if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+        var map = L.map('map').setView([lat, lng], 15);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Add marker
+        var marker = L.marker([lat, lng]).addTo(map);
+        marker.bindPopup('<b>' + laundryName + '</b><br>' + laundryAddress).openPopup();
+    }
+}
+</script>
+{% endblock %}

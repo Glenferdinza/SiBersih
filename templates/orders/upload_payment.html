@@ -1,0 +1,377 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Upload Bukti Pembayaran - SiBersih{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block content %}
+{% include 'components/floating_icons.html' %}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #F0FDFA 0%, #ECFEFF 100%);
+        min-height: 100vh;
+    }
+
+    .payment-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+    
+    .payment-header {
+        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        color: white;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .payment-header h1 {
+        font-size: 2rem;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .payment-header p {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+    
+    .payment-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+    
+    .order-info {
+        background: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(20, 184, 166, 0.08) 100%);
+        border-left: 4px solid #14B8A6;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+    
+    .order-info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #E2E8F0;
+    }
+    
+    .order-info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        color: #64748B;
+        font-weight: 500;
+    }
+    
+    .info-value {
+        color: #0F766E;
+        font-weight: 600;
+    }
+    
+    .total-amount {
+        font-size: 1.5rem;
+        color: #0D9488;
+    }
+    
+    .payment-instructions {
+        background: #FEF3C7;
+        border-left: 4px solid #F59E0B;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+    
+    .payment-instructions h3 {
+        color: #92400E;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+    
+    .payment-instructions ol {
+        color: #78350F;
+        padding-left: 1.5rem;
+        margin: 0;
+    }
+    
+    .payment-instructions li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .upload-section {
+        text-align: center;
+        padding: 2rem;
+        border: 2px dashed #CBD5E1;
+        border-radius: 16px;
+        background: #F8FAFC;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .upload-section:hover {
+        border-color: #14B8A6;
+        background: rgba(20, 184, 166, 0.02);
+    }
+    
+    .upload-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+    
+    .upload-section h3 {
+        color: #334155;
+        margin-bottom: 0.5rem;
+    }
+    
+    .upload-section p {
+        color: #64748B;
+        margin-bottom: 1.5rem;
+    }
+    
+    .file-input-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .file-input {
+        display: none;
+    }
+    
+    .file-label {
+        display: inline-block;
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        color: white;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .file-label:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(13, 148, 136, 0.3);
+    }
+    
+    .preview-container {
+        margin-top: 2rem;
+        display: none;
+    }
+    
+    .preview-container.active {
+        display: block;
+    }
+    
+    .preview-image {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .file-name {
+        color: #0F766E;
+        font-weight: 600;
+        margin-top: 1rem;
+    }
+    
+    .btn-submit {
+        width: 100%;
+        padding: 1.2rem;
+        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-submit:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(13, 148, 136, 0.3);
+    }
+    
+    .btn-submit:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .existing-payment {
+        background: #DBEAFE;
+        border-left: 4px solid #3B82F6;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+    
+    .existing-payment h3 {
+        color: #1E40AF;
+        margin-bottom: 1rem;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .status-pending {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+    
+    .status-verified {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+    
+    .status-rejected {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+</style>
+
+<div class="payment-container">
+    <div class="payment-header">
+        <h1>📤 Upload Bukti Pembayaran</h1>
+        <p>Order #{{ order.order_number }}</p>
+    </div>
+    
+    {% if payment %}
+    <div class="existing-payment">
+        <h3>📋 Status Pembayaran Saat Ini</h3>
+        <p>
+            Status: 
+            <span class="status-badge status-{{ payment.status }}">
+                {{ payment.get_status_display }}
+            </span>
+        </p>
+        {% if payment.status == 'rejected' and payment.admin_notes %}
+        <p style="color: #991B1B; margin-top: 1rem;">
+            <strong>Alasan Penolakan:</strong> {{ payment.admin_notes }}
+        </p>
+        <p style="color: #78350F; margin-top: 0.5rem;">
+            Silakan upload ulang bukti pembayaran yang valid.
+        </p>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <div class="payment-card">
+        <div class="order-info">
+            <h3 style="color: #0F766E; margin-bottom: 1rem;">📋 Detail Pesanan</h3>
+            <div class="order-info-row">
+                <span class="info-label">No. Order</span>
+                <span class="info-value">{{ order.order_number }}</span>
+            </div>
+            <div class="order-info-row">
+                <span class="info-label">Laundry</span>
+                <span class="info-value">{{ order.laundry.name }}</span>
+            </div>
+            <div class="order-info-row">
+                <span class="info-label">Metode Pembayaran</span>
+                <span class="info-value">{{ payment_method_name }}</span>
+            </div>
+            <div class="order-info-row">
+                <span class="info-label">Total Pembayaran</span>
+                <span class="info-value total-amount">Rp {{ order.total_price|floatformat:0 }}</span>
+            </div>
+        </div>
+        
+        <div class="payment-instructions">
+            <h3>💡 Petunjuk Pembayaran</h3>
+            <ol>
+                <li>Lakukan pembayaran sebesar <strong>Rp {{ order.total_price|floatformat:0 }}</strong> melalui {{ payment_method_name }}</li>
+                <li>Screenshot atau foto bukti pembayaran Anda</li>
+                <li>Upload bukti pembayaran menggunakan form di bawah</li>
+                <li>Tunggu verifikasi dari admin (maks. 1x24 jam)</li>
+                <li>Pesanan akan diproses setelah pembayaran terverifikasi</li>
+            </ol>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data" id="paymentForm">
+            {% csrf_token %}
+            
+            <div class="upload-section" id="uploadSection">
+                <div class="upload-icon">📸</div>
+                <h3>Upload Bukti Pembayaran</h3>
+                <p>Format: JPG, PNG, atau PDF (max 5MB)</p>
+                
+                <div class="file-input-wrapper">
+                    <input type="file" 
+                           name="proof_image" 
+                           id="proofImage" 
+                           class="file-input" 
+                           accept="image/*,.pdf" 
+                           required 
+                           onchange="previewFile()">
+                    <label for="proofImage" class="file-label">
+                        📁 Pilih File
+                    </label>
+                </div>
+                
+                <div class="preview-container" id="previewContainer">
+                    <img src="" alt="Preview" class="preview-image" id="previewImage">
+                    <p class="file-name" id="fileName"></p>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-submit" id="submitBtn" disabled>
+                ✅ Upload Bukti Pembayaran
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function previewFile() {
+        const fileInput = document.getElementById('proofImage');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const fileName = document.getElementById('fileName');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        const file = fileInput.files[0];
+        
+        if (file) {
+            // Check file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Ukuran file terlalu besar. Maksimal 5MB.');
+                fileInput.value = '';
+                return;
+            }
+            
+            // Show preview for images
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewContainer.classList.add('active');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // For PDF, just show file name
+                previewImage.style.display = 'none';
+                previewContainer.classList.add('active');
+            }
+            
+            fileName.textContent = '📄 ' + file.name;
+            submitBtn.disabled = false;
+        }
+    }
+</script>
+{% endblock %}

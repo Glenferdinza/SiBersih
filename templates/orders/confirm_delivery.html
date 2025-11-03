@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Konfirmasi Penerimaan - SiBersih{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/animations.css' %}">
+<style>
+    body {
+        background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+        min-height: 100vh;
+    }
+
+    .confirm-wrapper {
+        padding: 110px 20px 40px;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .confirm-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+
+    .confirm-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 25px;
+        background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .confirm-icon svg {
+        width: 45px;
+        height: 45px;
+        fill: white;
+    }
+
+    .confirm-title {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 15px;
+    }
+
+    .confirm-subtitle {
+        text-align: center;
+        color: #64748b;
+        font-size: 1.05rem;
+        margin-bottom: 35px;
+        line-height: 1.6;
+    }
+
+    .order-info {
+        background: #f8fafc;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+
+    .order-info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .order-info-item:last-child {
+        border-bottom: none;
+    }
+
+    .order-info-label {
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .order-info-value {
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    .warning-box {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 2px solid #f59e0b;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+        display: flex;
+        gap: 15px;
+    }
+
+    .warning-box svg {
+        width: 24px;
+        height: 24px;
+        fill: #d97706;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .warning-text {
+        color: #92400e;
+        line-height: 1.6;
+    }
+
+    .warning-text strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 1.05rem;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 18px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        border: none;
+    }
+
+    .btn svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .btn-confirm {
+        background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4);
+    }
+
+    .btn-confirm:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(20, 184, 166, 0.6);
+    }
+
+    .btn-cancel {
+        background: #f1f5f9;
+        color: #64748b;
+        border: 2px solid #e5e7eb;
+    }
+
+    .btn-cancel:hover {
+        background: #e5e7eb;
+        color: #475569;
+    }
+
+    @media (max-width: 768px) {
+        .confirm-wrapper {
+            padding: 90px 15px 30px;
+        }
+
+        .confirm-card {
+            padding: 30px 20px;
+        }
+
+        .btn-group {
+            flex-direction: column-reverse;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirm-wrapper">
+    <div class="confirm-card">
+        <div class="confirm-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+
+        <h1 class="confirm-title">Konfirmasi Penerimaan</h1>
+        <p class="confirm-subtitle">
+            Pastikan cucian Anda sudah diterima dengan baik sebelum mengkonfirmasi.
+        </p>
+
+        <div class="order-info">
+            <div class="order-info-item">
+                <span class="order-info-label">No. Order</span>
+                <span class="order-info-value">#{{ order.order_number }}</span>
+            </div>
+            <div class="order-info-item">
+                <span class="order-info-label">Laundry</span>
+                <span class="order-info-value">{{ order.laundry.name }}</span>
+            </div>
+            <div class="order-info-item">
+                <span class="order-info-label">Berat</span>
+                <span class="order-info-value">{{ order.weight_kg }} kg</span>
+            </div>
+            <div class="order-info-item">
+                <span class="order-info-label">Total Pembayaran</span>
+                <span class="order-info-value">Rp {{ order.total_price|floatformat:0 }}</span>
+            </div>
+        </div>
+
+        <div class="warning-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <div class="warning-text">
+                <strong>Perhatian!</strong>
+                Dengan mengkonfirmasi penerimaan, Anda menyatakan bahwa cucian sudah diterima dengan baik. Setelah konfirmasi, Anda akan diarahkan untuk memberikan review dan rating untuk laundry ini.
+            </div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="btn-group">
+                <a href="{% url 'orders:my_orders' %}" class="btn btn-cancel">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                    Batal
+                </a>
+                <button type="submit" class="btn btn-confirm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Ya, Saya Sudah Terima
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

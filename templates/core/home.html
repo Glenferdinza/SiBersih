@@ -1,0 +1,390 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}SiBersih - Laundry Modern & Terpercaya{% endblock %}
+
+{% block content %}
+<section class="hero-modern">
+    <div class="hero-overlay-modern"></div>
+    <div class="hero-content-modern">
+        <div class="hero-text-modern">
+            <h1 class="hero-main-title">Laundry's</h1>
+            <h1 class="hero-main-subtitle">Perfect</h1>
+            <h1 class="hero-main-subtitle">Services</h1>
+            <p class="hero-description-modern">Temukan layanan laundry premium di lokasi terbaik. Bersih, cepat, dan terpercaya untuk kebutuhan Anda.</p>
+            
+            <!-- Rating Badge -->
+            <div class="rating-badge-modern">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                <span class="rating-number">4.9</span>
+                <span class="rating-count">dari 2,500+ layanan</span>
+            </div>
+        </div>
+        
+        <!-- Booking Card Overlay -->
+        <div class="booking-card-modern">
+            <h3 class="booking-title">SiBersih Express</h3>
+            <button class="edit-service-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+            </button>
+            
+            <div class="booking-dates">
+                <div class="date-picker">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"/>
+                        <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"/>
+                        <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <div class="date-info">
+                        <span class="date-label">Tanggal Pickup</span>
+                        <span class="date-value" id="pickupDate">Hari ini</span>
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="6 9 12 15 18 9" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </div>
+                
+                <div class="date-picker">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"/>
+                        <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"/>
+                        <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <div class="date-info">
+                        <span class="date-label">Selesai</span>
+                        <span class="date-value" id="returnDate">Besok</span>
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="6 9 12 15 18 9" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="booking-time">
+                <div class="time-slot">
+                    <span class="time-label">Pickup</span>
+                    <span class="time-value">Setelah 14:00</span>
+                </div>
+                <div class="time-slot">
+                    <span class="time-label">Return</span>
+                    <span class="time-value">Sebelum 18:00</span>
+                </div>
+            </div>
+            
+            <div class="booking-price">
+                <div class="price-main">
+                    <span class="price-amount">Rp15.000</span>
+                    <span class="price-unit">/kg</span>
+                </div>
+                <div class="guest-count">
+                    <span>Min. 3 kg</span>
+                </div>
+            </div>
+            
+            <a href="{% url 'core:dashboard' %}" class="btn-reserve">Pesan Sekarang</a>
+        </div>
+    </div>
+</section>
+
+<section class="services-premium" id="features">
+    <!-- Floating Decorative Icons -->
+    <div class="floating-icons">
+        <div class="float-icon float-icon-1">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 8h18M3 12h18M3 16h18M7 4v16M17 4v16" stroke="#0D9488" stroke-width="1.5" opacity="0.3"/>
+            </svg>
+        </div>
+        <div class="float-icon float-icon-2">
+            <svg width="35" height="35" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9" stroke="#14B8A6" stroke-width="1.5" opacity="0.4"/>
+                <circle cx="8" cy="10" r="1.5" fill="#14B8A6" opacity="0.5"/>
+                <circle cx="14" cy="14" r="2" fill="#14B8A6" opacity="0.3"/>
+            </svg>
+        </div>
+        <div class="float-icon float-icon-3">
+            <svg width="45" height="45" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4" y="6" width="16" height="14" rx="2" stroke="#10B981" stroke-width="1.5" opacity="0.35"/>
+                <circle cx="12" cy="13" r="4" stroke="#10B981" stroke-width="1.5" opacity="0.4"/>
+            </svg>
+        </div>
+        <div class="float-icon float-icon-4">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3v18M3 12h18" stroke="#06B6D4" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+                <circle cx="12" cy="12" r="8" stroke="#06B6D4" stroke-width="1.5" opacity="0.35"/>
+            </svg>
+        </div>
+        <div class="float-icon float-icon-5">
+            <svg width="42" height="42" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="8" cy="8" r="2" fill="#0D9488" opacity="0.4"/>
+                <circle cx="16" cy="12" r="2.5" fill="#14B8A6" opacity="0.35"/>
+                <circle cx="10" cy="16" r="1.8" fill="#10B981" opacity="0.3"/>
+            </svg>
+        </div>
+        <div class="float-icon float-icon-6">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 9l6 6 6-6" stroke="#06B6D4" stroke-width="2" stroke-linecap="round" opacity="0.35"/>
+                <rect x="5" y="5" width="14" height="14" rx="7" stroke="#06B6D4" stroke-width="1.5" opacity="0.25"/>
+            </svg>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="section-header-center">
+            <h2 class="section-title-premium">Layanan Kami</h2>
+            <p class="section-subtitle-premium">Pilihan layanan terbaik untuk kebutuhan laundry Anda dengan hasil premium</p>
+        </div>
+        
+        <!-- 3 Kotak Feature Cards -->
+        <div class="features-grid-premium">
+            <div class="feature-card-premium">
+                <div class="feature-card-content">
+                    <div class="feature-number">01</div>
+                    <h3>Pesan Laundry</h3>
+                    <p>Pesan layanan laundry dengan mudah melalui platform digital kami. Pilih jenis layanan, tentukan jadwal, dan biarkan kami mengurus sisanya.</p>
+                    <a href="{% url 'core:dashboard' %}" class="feature-link">Pesan Sekarang →</a>
+                </div>
+            </div>
+            <div class="feature-card-premium">
+                <div class="feature-card-content">
+                    <div class="feature-number">02</div>
+                    <h3>Lacak Pesanan</h3>
+                    <p>Pantau status laundry Anda secara real-time dari penjemputan hingga pengiriman kembali. Transparansi penuh untuk kenyamanan Anda.</p>
+                    <a href="{% url 'core:dashboard' %}" class="feature-link">Lacak Pesanan →</a>
+                </div>
+            </div>
+            <div class="feature-card-premium">
+                <div class="feature-card-content">
+                    <div class="feature-number">03</div>
+                    <h3>Riwayat Lengkap</h3>
+                    <p>Akses semua riwayat transaksi laundry Anda dengan mudah. Data tersimpan aman dan dapat diakses kapan saja.</p>
+                    <a href="{% url 'core:dashboard' %}" class="feature-link">Lihat Riwayat →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonial Section -->
+<section class="testimonials-section" style="margin-top: 80px;">
+    <!-- Floating Decorative Icons for Testimonials -->
+    <div class="floating-icons-testimonials">
+        <div class="float-icon-test float-icon-test-1">
+            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 8h10M7 12h10M7 16h7" stroke="#0D9488" stroke-width="1.5" stroke-linecap="round" opacity="0.25"/>
+                <rect x="4" y="4" width="16" height="16" rx="3" stroke="#0D9488" stroke-width="1.5" opacity="0.3"/>
+            </svg>
+        </div>
+        <div class="float-icon-test float-icon-test-2">
+            <svg width="45" height="45" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="#14B8A6" stroke-width="1.5" fill="none" opacity="0.35"/>
+            </svg>
+        </div>
+        <div class="float-icon-test float-icon-test-3">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9" cy="9" r="2" fill="#10B981" opacity="0.3"/>
+                <circle cx="15" cy="15" r="2.5" fill="#14B8A6" opacity="0.4"/>
+                <circle cx="18" cy="8" r="1.5" fill="#0D9488" opacity="0.35"/>
+            </svg>
+        </div>
+        <div class="float-icon-test float-icon-test-4">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 6L9 17l-5-5" stroke="#06B6D4" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+            </svg>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="section-header-center">
+            <h2 class="section-title-premium">Kata Mereka Tentang Kami</h2>
+            <p class="section-subtitle-premium">Pengalaman nyata dari pelanggan setia SiBersih</p>
+        </div>
+        
+        <div class="testimonials-slider" id="testimonialsSlider">
+            <button class="slider-btn slider-btn-prev" id="prevBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+            
+            <div class="testimonials-wrapper">
+                <div class="testimonials-track" id="testimonialsTrack">
+                    <!-- Testimonial 1 -->
+                    <div class="testimonial-card">
+                        <div class="testimonial-header">
+                            <div class="testimonial-avatar">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="8" r="5" fill="currentColor"/>
+                                    <path d="M3 21c0-4 4-7 9-7s9 3 9 7" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                            </div>
+                            <div class="testimonial-info">
+                                <h4>Budi Santoso</h4>
+                                <p>Mahasiswa UI</p>
+                            </div>
+                        </div>
+                        <div class="testimonial-rating">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        <p class="testimonial-text">"Pelayanan SiBersih luar biasa! Pakaian saya selalu bersih, wangi, dan rapi. Sistem pickup dan delivery-nya sangat membantu saya yang sibuk kuliah."</p>
+                    </div>
+                    
+                    <!-- Testimonial 2 -->
+                    <div class="testimonial-card">
+                        <div class="testimonial-header">
+                            <div class="testimonial-avatar">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="8" r="5" fill="currentColor"/>
+                                    <path d="M3 21c0-4 4-7 9-7s9 3 9 7" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                            </div>
+                            <div class="testimonial-info">
+                                <h4>Siti Nurhaliza</h4>
+                                <p>Ibu Rumah Tangga</p>
+                            </div>
+                        </div>
+                        <div class="testimonial-rating">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        <p class="testimonial-text">"Sudah langganan di SiBersih hampir 2 tahun. Harga terjangkau, kualitas oke, dan customer servicenya ramah. Recommended banget!"</p>
+                    </div>
+                    
+                    <!-- Testimonial 3 -->
+                    <div class="testimonial-card">
+                        <div class="testimonial-header">
+                            <div class="testimonial-avatar">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="8" r="5" fill="currentColor"/>
+                                    <path d="M3 21c0-4 4-7 9-7s9 3 9 7" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                            </div>
+                            <div class="testimonial-info">
+                                <h4>Ahmad Rizki</h4>
+                                <p>Karyawan Swasta</p>
+                            </div>
+                        </div>
+                        <div class="testimonial-rating">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#E0E0E0" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        <p class="testimonial-text">"Aplikasinya mudah dipakai, bisa lacak pesanan real-time. Pengalaman laundry jadi lebih modern dan praktis!"</p>
+                    </div>
+                    
+                    <!-- Testimonial 4 -->
+                    <div class="testimonial-card">
+                        <div class="testimonial-header">
+                            <div class="testimonial-avatar">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="8" r="5" fill="currentColor"/>
+                                    <path d="M3 21c0-4 4-7 9-7s9 3 9 7" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                            </div>
+                            <div class="testimonial-info">
+                                <h4>Dewi Lestari</h4>
+                                <p>Pengusaha Online</p>
+                            </div>
+                        </div>
+                        <div class="testimonial-rating">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFB800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        <p class="testimonial-text">"Perfect untuk yang sibuk kayak saya! Tinggal order online, dijemput, dan diantar kembali. Waktu saya jadi lebih produktif."</p>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="slider-btn slider-btn-next" id="nextBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="slider-dots" id="sliderDots">
+            <button class="dot active" data-index="0"></button>
+            <button class="dot" data-index="1"></button>
+            <button class="dot" data-index="2"></button>
+            <button class="dot" data-index="3"></button>
+        </div>
+    </div>
+</section>
+
+        </div>
+    </div>
+</section>
+
+<!-- CTA Premium Section -->
+<section class="cta-premium">
+    <div class="container">
+        <div class="cta-content-premium">
+            <h2>Bergabung sebagai Mitra SiBersih</h2>
+            <p>Kembangkan bisnis laundry Anda bersama platform digital terpercaya dengan jangkauan pelanggan yang luas</p>
+            <a href="{% url 'partners:apply_mitra' %}" class="btn-cta-premium">Daftar Sebagai Mitra</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/home.js' %}"></script>
+{% endblock %}

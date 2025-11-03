@@ -1,0 +1,760 @@
+<!-- Solid Navbar untuk Dashboard Pages (User/Mitra/Admin) -->
+{% load static %}
+
+<nav class="dashboard-navbar">
+    <div class="nav-container">
+        <!-- Logo -->
+        <a href="{% url 'core:home' %}" class="nav-logo">
+            <div class="logo-symbol">
+                <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="2.5"/>
+                    <path d="M14 20c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                    <circle cx="20" cy="12" r="2" fill="currentColor"/>
+                </svg>
+            </div>
+            <span class="logo-text">SiBersih</span>
+        </a>
+
+        <!-- Navigation Menu -->
+        <div class="nav-menu">
+            <!-- Home Link -->
+            <a href="{% url 'core:home' %}" class="nav-item">
+                <svg class="nav-icon" width="20" height="20">
+                    <use href="{% static 'icons/icons.svg' %}#icon-dashboard"></use>
+                </svg>
+                <span>Beranda</span>
+            </a>
+
+            <!-- User Dropdown -->
+            {% if user.role == 'user' %}
+            <div class="nav-dropdown">
+                <button class="nav-dropdown-toggle" id="userDropdown">
+                    <svg class="nav-icon" width="20" height="20">
+                        <use href="{% static 'icons/icons.svg' %}#icon-user"></use>
+                    </svg>
+                    <span>Menu User</span>
+                    <svg class="dropdown-arrow" width="16" height="16">
+                        <use href="{% static 'icons/icons.svg' %}#icon-chevron-down"></use>
+                    </svg>
+                </button>
+                <div class="nav-dropdown-menu">
+                    <a href="{% url 'core:home' %}" class="dropdown-item">
+                        <svg class="dropdown-icon" width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-wash"></use>
+                        </svg>
+                        <span>Cari Laundry</span>
+                    </a>
+                    <a href="{% url 'orders:create_order' %}" class="dropdown-item">
+                        <svg class="dropdown-icon" width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-package"></use>
+                        </svg>
+                        <span>Buat Pesanan</span>
+                    </a>
+                    <a href="{% url 'orders:order_history' %}" class="dropdown-item">
+                        <svg class="dropdown-icon" width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-calendar"></use>
+                        </svg>
+                        <span>Riwayat Order</span>
+                    </a>
+                    <a href="{% url 'core:dashboard' %}" class="dropdown-item">
+                        <svg class="dropdown-icon" width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-voucher"></use>
+                        </svg>
+                        <span>Voucher Saya</span>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Mitra Dropdown -->
+            {% if user.role == 'mitra' %}
+            <div class="nav-dropdown">
+                <button class="nav-dropdown-toggle" id="mitraDropdown">
+                    <svg class="nav-icon" width="20" height="20">
+                        <use href="{% static 'icons/icons.svg' %}#icon-wash"></use>
+                    </svg>
+                    <span>Menu Mitra</span>
+                    <svg class="dropdown-arrow" width="16" height="16">
+                        <use href="{% static 'icons/icons.svg' %}#icon-chevron-down"></use>
+                    </svg>
+                </button>
+                <div class="nav-dropdown-menu">
+                    <a href="{% url 'core:dashboard' %}" class="dropdown-item">
+                        <svg class="dropdown-icon" width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-dashboard"></use>
+                        </svg>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{% url 'core:dashboard' %}" class="dropdown-item">
+                        <svg class="dropdown-icon" width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-package"></use>
+                        </svg>
+                        <span>Kelola Pesanan</span>
+                    </a>
+                    <a href="{% url 'core:dashboard' %}" class="dropdown-item">
+                        <svg class="dropdown-icon" width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-edit"></use>
+                        </svg>
+                        <span>Edit Laundry</span>
+                    </a>
+                    <a href="{% url 'core:dashboard' %}" class="dropdown-item">
+                        <svg class="dropdown-icon" width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-upload"></use>
+                        </svg>
+                        <span>Upload Gambar</span>
+                    </a>
+                    <a href="{% url 'partners:create_voucher_request' %}" class="dropdown-item">
+                        <svg class="dropdown-icon" width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-voucher"></use>
+                        </svg>
+                        <span>Request Voucher</span>
+                    </a>
+                    <a href="{% url 'core:dashboard' %}" class="dropdown-item">
+                        <svg class="dropdown-icon" width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-money"></use>
+                        </svg>
+                        <span>Laporan Keuangan</span>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Admin Dropdown -->
+            {% if user.role == 'admin' %}
+            <div class="nav-dropdown">
+                <button class="nav-dropdown-toggle" id="adminDropdown">
+                    <svg class="nav-icon" width="20" height="20">
+                        <use href="{% static 'icons/icons.svg' %}#icon-shield"></use>
+                    </svg>
+                    <span>Menu Admin</span>
+                    <svg class="dropdown-arrow" width="16" height="16">
+                        <use href="{% static 'icons/icons.svg' %}#icon-chevron-down"></use>
+                    </svg>
+                </button>
+                <div class="nav-dropdown-menu">
+                    <a href="{% url 'core:admin_dashboard' %}" class="dropdown-item">
+                        <svg class="dropdown-icon" width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-dashboard"></use>
+                        </svg>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{% url 'core:admin_dashboard' %}" class="dropdown-item">
+                        <svg class="dropdown-icon" width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-check"></use>
+                        </svg>
+                        <span>Approve Mitra</span>
+                    </a>
+                    <a href="{% url 'partners:admin_voucher_requests' %}" class="dropdown-item">
+                        <svg class="dropdown-icon" width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-voucher"></use>
+                        </svg>
+                        <span>Approve Voucher</span>
+                        <span class="badge" id="voucherRequestBadge">0</span>
+                    </a>
+                    <a href="{% url 'core:admin_dashboard' %}" class="dropdown-item">
+                        <svg class="dropdown-icon" width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-package"></use>
+                        </svg>
+                        <span>Semua Pesanan</span>
+                    </a>
+                    <a href="{% url 'core:admin_dashboard' %}" class="dropdown-item">
+                        <svg class="dropdown-icon" width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-user"></use>
+                        </svg>
+                        <span>Kelola User</span>
+                    </a>
+                    <a href="{% url 'core:admin_dashboard' %}" class="dropdown-item">
+                        <svg class="dropdown-icon" width="18" height="18">
+                            <use href="{% static 'icons/icons.svg' %}#icon-settings"></use>
+                        </svg>
+                        <span>Pengaturan</span>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Messages Icon (dengan notifikasi) -->
+            <a href="#" class="nav-item nav-icon-only" id="messagesBtn">
+                <svg class="nav-icon" width="20" height="20">
+                    <use href="{% static 'icons/icons.svg' %}#icon-message"></use>
+                </svg>
+                <span class="notification-dot" id="messagesDot"></span>
+            </a>
+        </div>
+
+        <!-- User Profile Dropdown -->
+        <div class="nav-dropdown nav-user-dropdown">
+            <button class="nav-user-toggle" id="userProfileToggle">
+                <div class="user-avatar">
+                    {% if user.profile.profile_picture %}
+                    <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}">
+                    {% else %}
+                    <svg width="24" height="24">
+                        <use href="{% static 'icons/icons.svg' %}#icon-user"></use>
+                    </svg>
+                    {% endif %}
+                </div>
+                <div class="user-info">
+                    <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
+                    <span class="user-role">{{ user.get_role_display }}</span>
+                </div>
+                <svg class="dropdown-arrow" width="16" height="16">
+                    <use href="{% static 'icons/icons.svg' %}#icon-chevron-down"></use>
+                </svg>
+            </button>
+            <div class="nav-dropdown-menu nav-user-menu">
+                <a href="{% url 'accounts:profile' %}" class="dropdown-item">
+                    <svg class="dropdown-icon" width="18" height="18">
+                        <use href="{% static 'icons/icons.svg' %}#icon-user"></use>
+                    </svg>
+                    <span>Profil Saya</span>
+                </a>
+                <a href="{% url 'accounts:settings' %}" class="dropdown-item">
+                    <svg class="dropdown-icon" width="18" height="18">
+                        <use href="{% static 'icons/icons.svg' %}#icon-settings"></use>
+                    </svg>
+                    <span>Pengaturan</span>
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="{% url 'accounts:logout' %}" class="dropdown-item text-danger">
+                    <svg class="dropdown-icon" width="18" height="18">
+                        <use href="{% static 'icons/icons.svg' %}#icon-logout"></use>
+                    </svg>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="nav-mobile-toggle" id="mobileMenuToggle">
+            <svg width="24" height="24">
+                <use href="{% static 'icons/icons.svg' %}#icon-menu"></use>
+            </svg>
+        </button>
+    </div>
+</nav>
+
+<!-- Messages Modal -->
+<div class="messages-modal" id="messagesModal">
+    <div class="messages-modal-content">
+        <div class="messages-modal-header">
+            <h3>
+                <svg width="24" height="24" style="vertical-align: middle; margin-right: 8px;">
+                    <use href="{% static 'icons/icons.svg' %}#icon-message"></use>
+                </svg>
+                Kotak Pesan
+            </h3>
+            <button class="modal-close-btn" id="closeMessagesModal">
+                <svg width="20" height="20">
+                    <use href="{% static 'icons/icons.svg' %}#icon-close"></use>
+                </svg>
+            </button>
+        </div>
+        <div class="messages-modal-body">
+            <div class="empty-messages">
+                <svg width="80" height="80" style="color: #CBD5E1; margin-bottom: 1rem;">
+                    <use href="{% static 'icons/icons.svg' %}#icon-message"></use>
+                </svg>
+                <p style="color: #94A3B8; font-size: 1.1rem;">Kotak pesan kosong</p>
+                <p style="color: #CBD5E1; font-size: 0.9rem;">Belum ada pesan masuk</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.messages-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+}
+
+.messages-modal.active {
+    display: flex;
+}
+
+.messages-modal-content {
+    background: white;
+    border-radius: 20px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.messages-modal-header {
+    background: linear-gradient(135deg, #0D9488, #14B8A6);
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.messages-modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.modal-close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.messages-modal-body {
+    padding: 2rem;
+}
+
+.empty-messages {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+
+.dashboard-navbar {
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(20, 184, 166, 0.1);
+}
+
+.dashboard-navbar .nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+}
+
+.dashboard-navbar .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: var(--primary-teal, #14B8A6);
+}
+
+.dashboard-navbar .logo-symbol svg {
+    color: var(--primary-teal, #14B8A6);
+}
+
+.dashboard-navbar .logo-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary-teal, #14B8A6), var(--accent-emerald, #10B981));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dashboard-navbar .nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    margin-left: 3rem;
+}
+
+.dashboard-navbar .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    color: #64748B;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.dashboard-navbar .nav-item:hover {
+    background: rgba(20, 184, 166, 0.08);
+    color: var(--primary-teal, #14B8A6);
+}
+
+.dashboard-navbar .nav-icon {
+    color: currentColor;
+}
+
+.dashboard-navbar .nav-icon-only {
+    padding: 0.75rem;
+}
+
+.notification-dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    background: #EF4444;
+    border-radius: 50%;
+    display: none;
+}
+
+.notification-dot.active {
+    display: block;
+}
+
+/* Dropdown Styles */
+.nav-dropdown {
+    position: relative;
+}
+
+.nav-dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: none;
+    background: transparent;
+    color: #64748B;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.nav-dropdown-toggle:hover {
+    background: rgba(20, 184, 166, 0.08);
+    color: var(--primary-teal, #14B8A6);
+}
+
+.nav-dropdown-toggle.active {
+    background: rgba(20, 184, 166, 0.12);
+    color: var(--primary-teal, #14B8A6);
+}
+
+.dropdown-arrow {
+    transition: transform 0.3s ease;
+}
+
+.nav-dropdown-toggle.active .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.nav-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    min-width: 240px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.nav-dropdown-menu[style*="opacity: 1"] {
+    pointer-events: auto;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    color: #475569;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.dropdown-item:first-child {
+    border-radius: 12px 12px 0 0;
+}
+
+.dropdown-item:last-child {
+    border-radius: 0 0 12px 12px;
+}
+
+.dropdown-item:hover {
+    background: rgba(20, 184, 166, 0.08);
+    color: var(--primary-teal, #14B8A6);
+}
+
+.dropdown-item.text-danger {
+    color: #EF4444;
+}
+
+.dropdown-item.text-danger:hover {
+    background: rgba(239, 68, 68, 0.08);
+}
+
+.dropdown-icon {
+    color: currentColor;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: #E2E8F0;
+    margin: 0.5rem 0;
+}
+
+.badge {
+    background: #EF4444;
+    color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+/* User Dropdown */
+.nav-user-dropdown {
+    position: relative;
+    margin-left: 1rem;
+}
+
+.nav-user-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.nav-user-toggle:hover {
+    background: rgba(20, 184, 166, 0.05);
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-teal), var(--accent-emerald));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    overflow: hidden;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #1E293B;
+    font-size: 0.9rem;
+}
+
+.user-role {
+    font-size: 0.75rem;
+    color: #64748B;
+}
+
+.nav-user-menu {
+    right: 0;
+    left: auto;
+}
+
+.nav-mobile-toggle {
+    display: none;
+    border: none;
+    background: transparent;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: #64748B;
+}
+
+@media (max-width: 768px) {
+    .dashboard-navbar .nav-menu {
+        display: none;
+    }
+    
+    .nav-mobile-toggle {
+        display: block;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard navbar initialized');
+    
+    // Dropdown toggles - improved version
+    const dropdownToggles = document.querySelectorAll('.nav-dropdown-toggle, .nav-user-toggle');
+    
+    console.log('Found dropdown toggles:', dropdownToggles.length);
+    
+    dropdownToggles.forEach((toggle, index) => {
+        console.log(`Toggle ${index}:`, toggle.id || toggle.className);
+        
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('Toggle clicked:', this.id || this.className);
+            
+            // Check if this toggle is currently active
+            const isActive = this.classList.contains('active');
+            
+            console.log('Is currently active:', isActive);
+            
+            // Close all dropdowns and remove active from all toggles
+            document.querySelectorAll('.nav-dropdown-toggle, .nav-user-toggle').forEach(t => {
+                t.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.nav-dropdown-menu').forEach(menu => {
+                menu.style.opacity = '0';
+                menu.style.visibility = 'hidden';
+                menu.style.transform = 'translateY(-10px)';
+            });
+            
+            // Toggle current if it wasn't active
+            if (!isActive) {
+                console.log('Opening dropdown');
+                this.classList.add('active');
+                
+                // Find the menu (next sibling or within parent)
+                let menu = this.nextElementSibling;
+                
+                // If not found, look in parent's children
+                if (!menu || !menu.classList.contains('nav-dropdown-menu')) {
+                    const parent = this.parentElement;
+                    menu = parent.querySelector('.nav-dropdown-menu');
+                }
+                
+                if (menu && menu.classList.contains('nav-dropdown-menu')) {
+                    console.log('Menu found, opening');
+                    menu.style.opacity = '1';
+                    menu.style.visibility = 'visible';
+                    menu.style.transform = 'translateY(0)';
+                } else {
+                    console.error('Menu not found for toggle:', this);
+                }
+            } else {
+                console.log('Closing dropdown');
+            }
+        });
+    });
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.nav-dropdown') && !e.target.closest('.nav-user-dropdown')) {
+            console.log('Clicked outside, closing all dropdowns');
+            document.querySelectorAll('.nav-dropdown-toggle, .nav-user-toggle').forEach(toggle => {
+                toggle.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-dropdown-menu').forEach(menu => {
+                menu.style.opacity = '0';
+                menu.style.visibility = 'hidden';
+                menu.style.transform = 'translateY(-10px)';
+            });
+        }
+    });
+    
+    // Prevent dropdown menu clicks from closing
+    document.querySelectorAll('.nav-dropdown-menu').forEach(menu => {
+        menu.addEventListener('click', function(e) {
+            // Allow links to work, but stop propagation
+            if (e.target.tagName !== 'A') {
+                e.stopPropagation();
+            }
+        });
+    });
+    
+    // Messages modal handlers
+    const messagesBtn = document.getElementById('messagesBtn');
+    const messagesModal = document.getElementById('messagesModal');
+    const closeMessagesModal = document.getElementById('closeMessagesModal');
+    
+    if (messagesBtn) {
+        messagesBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            messagesModal.classList.add('active');
+        });
+    }
+    
+    if (closeMessagesModal) {
+        closeMessagesModal.addEventListener('click', function() {
+            messagesModal.classList.remove('active');
+        });
+    }
+    
+    // Close modal on background click
+    if (messagesModal) {
+        messagesModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    }
+    
+    // Close modal on ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (messagesModal && messagesModal.classList.contains('active')) {
+                messagesModal.classList.remove('active');
+            }
+            
+            // Also close dropdowns on ESC
+            document.querySelectorAll('.nav-dropdown-toggle, .nav-user-toggle').forEach(toggle => {
+                toggle.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-dropdown-menu').forEach(menu => {
+                menu.style.opacity = '0';
+                menu.style.visibility = 'hidden';
+                menu.style.transform = 'translateY(-10px)';
+            });
+        }
+    });
+    
+    console.log('Dashboard navbar setup complete');
+});
+</script>

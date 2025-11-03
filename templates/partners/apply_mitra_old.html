@@ -1,0 +1,697 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pendaftaran Mitra - SiBersih{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #F0FDFA 0%, #ECFEFF 100%);
+        min-height: 100vh;
+    }
+
+    .mitra-apply-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+
+    .apply-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .apply-header h1 {
+        font-size: 2.5rem;
+        color: var(--teal-dark);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .apply-header h1 svg {
+        width: 48px;
+        height: 48px;
+        stroke: var(--primary-teal);
+    }
+
+    .apply-header p {
+        font-size: 1.1rem;
+        color: var(--gray-600);
+    }
+
+    .apply-form-card {
+        background: white;
+        border-radius: 24px;
+        padding: 3rem;
+        box-shadow: 0 10px 40px rgba(13, 148, 136, 0.1);
+    }
+
+    .form-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .form-section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--teal-dark);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--teal-light);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .form-section-title svg {
+        width: 24px;
+        height: 24px;
+        stroke: var(--primary-teal);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .form-grid.two-cols {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .form-group {
+        margin-bottom: 0;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 500;
+        color: var(--gray-700);
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-group label .required {
+        color: #EF4444;
+        margin-left: 2px;
+    }
+
+    .form-group .help-text {
+        font-size: 0.85rem;
+        color: var(--gray-500);
+        margin-top: 0.25rem;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group input[type="tel"],
+    .form-group textarea {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid #E5E7EB;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s;
+        font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary-teal);
+        box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    /* Map Container */
+    .map-selector-container {
+        margin-top: 1rem;
+    }
+
+    .map-wrapper {
+        border: 2px solid #E5E7EB;
+        border-radius: 16px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    #map {
+        height: 400px;
+        width: 100%;
+    }
+
+    .map-instruction {
+        background: linear-gradient(135deg, var(--primary-teal), var(--accent-emerald));
+        color: white;
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.95rem;
+    }
+
+    .map-instruction svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        stroke: white;
+    }
+
+    .location-display {
+        background: #F0FDFA;
+        border: 2px solid var(--teal-light);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-top: 1rem;
+        display: none;
+    }
+
+    .location-display.active {
+        display: block;
+    }
+
+    .location-info-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .location-info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .location-info-item svg {
+        width: 20px;
+        height: 20px;
+        stroke: var(--primary-teal);
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .location-info-content {
+        flex: 1;
+    }
+
+    .location-info-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--gray-600);
+        margin-bottom: 0.25rem;
+    }
+
+    .location-info-value {
+        font-size: 0.95rem;
+        color: var(--teal-dark);
+        font-weight: 500;
+    }
+
+    .location-coordinates {
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        color: var(--gray-600);
+    }
+
+    /* Operational Cost Input */
+    .cost-input-group {
+        display: flex;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .currency-label {
+        background: var(--teal-light);
+        color: var(--teal-dark);
+        padding: 0.875rem 1.25rem;
+        border: 2px solid var(--teal-light);
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+    }
+
+    .cost-input-wrapper {
+        flex: 1;
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .cost-input-wrapper input {
+        padding-left: 1rem;
+        padding-right: 1rem;
+        border-radius: 12px;
+        border: 2px solid #E5E7EB;
+    }
+
+    .cost-unit {
+        background: var(--teal-light);
+        color: var(--teal-dark);
+        padding: 0.875rem 1.5rem;
+        border: 2px solid var(--teal-light);
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+    }
+
+    .cost-example {
+        background: linear-gradient(135deg, #F0FDFA 0%, #CCFBF1 100%);
+        border-left: 4px solid var(--primary-teal);
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin-top: 0.75rem;
+        font-size: 0.9rem;
+        color: var(--teal-dark);
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .cost-example svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        margin-top: 2px;
+        stroke: var(--primary-teal);
+    }
+
+    /* Submit Button */
+    .submit-section {
+        margin-top: 3rem;
+        text-align: center;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, var(--primary-teal), var(--accent-emerald));
+        color: white;
+        padding: 1rem 3rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 20px rgba(13, 148, 136, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .btn-submit svg {
+        width: 20px;
+        height: 20px;
+        stroke: white;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 30px rgba(13, 148, 136, 0.4);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .spin {
+        animation: spin 1s linear infinite;
+    }
+
+    @media (max-width: 768px) {
+        .apply-form-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .form-grid.two-cols {
+            grid-template-columns: 1fr;
+        }
+
+        .apply-header h1 {
+            font-size: 2rem;
+        }
+
+        .cost-input-group {
+            gap: 0.5rem;
+        }
+
+        #map {
+            height: 300px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include 'components/floating_icons.html' %}
+
+<div class="mitra-apply-container">
+    <div class="apply-header">
+        <h1>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            {% if is_mitra %}
+                {% if existing_laundry %}Edit Profil Laundry{% else %}Daftarkan Laundry Anda{% endif %}
+            {% else %}
+                Daftar Sebagai Mitra Laundry
+            {% endif %}
+        </h1>
+        <p>
+            {% if is_mitra %}
+                {% if existing_laundry %}
+                    Perbarui informasi laundry Anda untuk meningkatkan layanan kepada pelanggan
+                {% else %}
+                    Lengkapi informasi laundry Anda untuk mulai menerima pesanan dari pelanggan
+                {% endif %}
+            {% else %}
+                Bergabunglah dengan SiBersih dan kembangkan bisnis laundry Anda bersama kami
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="apply-form-card">
+        <form method="post" id="mitraApplicationForm">
+            {% csrf_token %}
+            
+            <!-- Business Information Section -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 22V12h6v10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Informasi Usaha
+                </h3>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="business_name">
+                            Nama Usaha Laundry <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="business_name" 
+                            name="business_name" 
+                            placeholder="Contoh: Laundry Bersih Express"
+                            value="{% if existing_laundry %}{{ existing_laundry.name }}{% endif %}"
+                            required
+                        >
+                        <p class="help-text">Nama usaha yang akan ditampilkan kepada customer</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">
+                            Deskripsi Layanan <span class="required">*</span>
+                        </label>
+                        <textarea 
+                            id="description" 
+                            name="description" 
+                            rows="4"
+                            placeholder="Ceritakan tentang layanan laundry Anda, keunggulan, dan fasilitas yang tersedia..."
+                            required
+                        >{% if existing_laundry %}{{ existing_laundry.mitra.description }}{% endif %}</textarea>
+                        <p class="help-text">Deskripsikan keunggulan dan layanan yang Anda tawarkan</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Section with Map -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Lokasi Usaha
+                </h3>
+
+                <div class="map-selector-container">
+                    <div class="map-wrapper">
+                        <div class="map-instruction">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            <span><strong>Geser marker merah</strong> ke lokasi usaha Anda, atau klik pada peta untuk menandai lokasi</span>
+                        </div>
+                        <div id="map"></div>
+                    </div>
+
+                    <div class="location-display" id="locationDisplay">
+                        <div class="location-info-grid">
+                            <div class="location-info-item">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke="currentColor" stroke-width="2"/>
+                                    <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                <div class="location-info-content">
+                                    <div class="location-info-label">Alamat Lokasi</div>
+                                    <div class="location-info-value" id="locationAddress">Memuat alamat...</div>
+                                </div>
+                            </div>
+                            <div class="location-info-item">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                    <polyline points="12 6 12 12 16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <div class="location-info-content">
+                                    <div class="location-info-label">Koordinat</div>
+                                    <div class="location-coordinates" id="locationCoordinates">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="latitude" name="latitude" value="{% if existing_laundry %}{{ existing_laundry.latitude }}{% endif %}">
+                    <input type="hidden" id="longitude" name="longitude" value="{% if existing_laundry %}{{ existing_laundry.longitude }}{% endif %}">
+                    <input type="hidden" id="location" name="location" value="{% if existing_laundry %}{{ existing_laundry.address }}{% endif %}">
+                    <input type="hidden" id="district" name="district" value="{% if existing_laundry %}{{ existing_laundry.district }}{% endif %}">
+                </div>
+            </div>
+
+            <!-- Pricing Section -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    Biaya Operasional
+                </h3>
+
+                <div class="form-group">
+                    <label for="operational_cost">
+                        Tarif Per Kilogram <span class="required">*</span>
+                    </label>
+                    <div class="cost-input-group">
+                        <div class="currency-label">Rp</div>
+                        <div class="cost-input-wrapper">
+                            <input 
+                                type="number" 
+                                id="operational_cost" 
+                                name="operational_cost" 
+                                min="1000"
+                                step="500"
+                                placeholder="5000"
+                                value="{% if existing_laundry %}{{ existing_laundry.price_per_kg|floatformat:0 }}{% endif %}"
+                                required
+                            >
+                        </div>
+                        <div class="cost-unit">per Kg</div>
+                    </div>
+                    <div class="cost-example">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span><strong>Contoh:</strong> Jika Anda input Rp 5.000, artinya customer akan dikenakan biaya Rp 5.000 untuk setiap 1 kg laundry.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="submit-section">
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    {% if is_mitra %}
+                        {% if existing_laundry %}Simpan Perubahan{% else %}Daftarkan Laundry{% endif %}
+                    {% else %}
+                        Kirim Pendaftaran
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Check if editing existing laundry
+    const existingLat = {% if existing_laundry %}{{ existing_laundry.latitude }}{% else %}null{% endif %};
+    const existingLng = {% if existing_laundry %}{{ existing_laundry.longitude }}{% else %}null{% endif %};
+    const existingAddress = {% if existing_laundry %}"{{ existing_laundry.address|escapejs }}"{% else %}null{% endif %};
+    
+    // Initialize map centered on Yogyakarta or existing location
+    const defaultLat = existingLat || -7.7715;
+    const defaultLng = existingLng || 110.4021;
+    
+    const map = L.map('map').setView([defaultLat, defaultLng], 13);
+    
+    // Add OpenStreetMap tiles with cachebuster for latest data
+    const timestamp = new Date().getTime();
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png?t=' + timestamp, {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19,
+        minZoom: 3,
+        updateWhenIdle: false,
+        updateWhenZooming: false,
+        keepBuffer: 2
+    }).addTo(map);
+    
+    // Custom marker icon (red)
+    const redIcon = L.icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+    
+    // Add draggable marker
+    let marker = L.marker([defaultLat, defaultLng], {
+        draggable: true,
+        icon: redIcon
+    }).addTo(map);
+    
+    marker.bindPopup("<b>📍 Lokasi Usaha Anda</b><br>Geser marker ini!").openPopup();
+    
+    // Update coordinates on marker drag
+    function updateLocation(lat, lng) {
+        document.getElementById('latitude').value = lat.toFixed(6);
+        document.getElementById('longitude').value = lng.toFixed(6);
+        document.getElementById('locationCoordinates').textContent = 
+            `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        document.getElementById('locationDisplay').classList.add('active');
+        
+        // Reverse geocoding to get address
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+            .then(response => response.json())
+            .then(data => {
+                let address = data.display_name || 'Alamat tidak ditemukan';
+                document.getElementById('locationAddress').textContent = address;
+                document.getElementById('location').value = address;
+            })
+            .catch(error => {
+                console.error('Error getting address:', error);
+                document.getElementById('locationAddress').textContent = 'Gagal memuat alamat';
+                document.getElementById('location').value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            });
+    }
+    
+    // Initialize with default location or existing location
+    if (existingAddress) {
+        // If editing existing laundry, show the saved address immediately
+        document.getElementById('locationAddress').textContent = existingAddress;
+        document.getElementById('locationCoordinates').textContent = 
+            `${defaultLat.toFixed(6)}, ${defaultLng.toFixed(6)}`;
+        document.getElementById('locationDisplay').classList.add('active');
+    } else {
+        // If new laundry, fetch address for default location
+        updateLocation(defaultLat, defaultLng);
+    }
+    
+    // Event: marker dragged
+    marker.on('dragend', function(e) {
+        const position = marker.getLatLng();
+        updateLocation(position.lat, position.lng);
+        map.panTo(position);
+    });
+    
+    // Event: click on map to move marker
+    map.on('click', function(e) {
+        marker.setLatLng(e.latlng);
+        updateLocation(e.latlng.lat, e.latlng.lng);
+        marker.openPopup();
+    });
+    
+    // Try to get user's current location (only if not editing existing laundry)
+    if (navigator.geolocation && !existingLat) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+                map.setView([userLat, userLng], 15);
+                marker.setLatLng([userLat, userLng]);
+                updateLocation(userLat, userLng);
+                marker.bindPopup("<b>📍 Lokasi Anda Saat Ini</b><br>Geser jika perlu disesuaikan").openPopup();
+            },
+            function(error) {
+                console.log('Geolocation error:', error.message);
+            }
+        );
+    }
+    
+    // Form validation
+    document.getElementById('mitraApplicationForm').addEventListener('submit', function(e) {
+        const lat = document.getElementById('latitude').value;
+        const lng = document.getElementById('longitude').value;
+        
+        if (!lat || !lng) {
+            e.preventDefault();
+            alert('Mohon tandai lokasi usaha Anda di peta!');
+            return false;
+        }
+        
+        const cost = document.getElementById('operational_cost').value;
+        if (cost < 1000) {
+            e.preventDefault();
+            alert('Biaya operasional minimal Rp 1.000 per kg');
+            return false;
+        }
+        
+        // Disable submit button to prevent double submission
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="spin">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" opacity="0.25"/>
+                <path d="M12 2a10 10 0 0110 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Mengirim...
+        `;
+    });
+    
+    // Format currency input
+    const costInput = document.getElementById('operational_cost');
+    costInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value) {
+            // Round to nearest 500
+            value = Math.round(value / 500) * 500;
+            e.target.value = value;
+        }
+    });
+</script>
+{% endblock %}

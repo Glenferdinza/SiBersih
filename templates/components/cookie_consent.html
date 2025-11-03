@@ -1,0 +1,168 @@
+<!-- Cookie Consent Popup -->
+<style>
+    .cookie-consent {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, #0F766E 0%, #0D9488 100%);
+        color: white;
+        padding: 1.5rem;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+        z-index: 9999;
+        transform: translateY(100%);
+        transition: transform 0.4s ease;
+    }
+    
+    .cookie-consent.show {
+        transform: translateY(0);
+    }
+    
+    .cookie-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+    }
+    
+    .cookie-text {
+        flex: 1;
+    }
+    
+    .cookie-text h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .cookie-text p {
+        font-size: 0.95rem;
+        opacity: 0.95;
+        line-height: 1.5;
+    }
+    
+    .cookie-text a {
+        color: #FDE68A;
+        text-decoration: underline;
+    }
+    
+    .cookie-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .cookie-btn {
+        padding: 0.875rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        font-size: 1rem;
+    }
+    
+    .btn-accept {
+        background: white;
+        color: #0F766E;
+    }
+    
+    .btn-accept:hover {
+        background: #F0FDFA;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .btn-decline {
+        background: transparent;
+        color: white;
+        border: 2px solid white;
+    }
+    
+    .btn-decline:hover {
+        background: rgba(255,255,255,0.1);
+    }
+    
+    @media (max-width: 768px) {
+        .cookie-content {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .cookie-actions {
+            width: 100%;
+            flex-direction: column;
+        }
+        
+        .cookie-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="cookie-consent" id="cookieConsent">
+    <div class="cookie-content">
+        <div class="cookie-text">
+            <h3>🍪 Kami Menggunakan Cookie</h3>
+            <p>
+                Kami menggunakan cookie untuk meningkatkan pengalaman Anda, menganalisis lalu lintas situs,
+                dan mempersonalisasi konten. Dengan melanjutkan menggunakan situs ini, Anda menyetujui penggunaan cookie kami.
+                <a href="#" target="_blank">Pelajari lebih lanjut</a>
+            </p>
+        </div>
+        <div class="cookie-actions">
+            <button class="cookie-btn btn-accept" onclick="acceptCookies()">
+                ✅ Terima Semua
+            </button>
+            <button class="cookie-btn btn-decline" onclick="declineCookies()">
+                ❌ Tolak
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Check if user has already made a choice
+    function checkCookieConsent() {
+        const consent = localStorage.getItem('cookieConsent');
+        const popup = document.getElementById('cookieConsent');
+        
+        if (!consent) {
+            // Show popup after 1 second
+            setTimeout(() => {
+                popup.classList.add('show');
+            }, 1000);
+        }
+    }
+    
+    function acceptCookies() {
+        localStorage.setItem('cookieConsent', 'accepted');
+        localStorage.setItem('cookieConsentDate', new Date().toISOString());
+        hideCookiePopup();
+        
+        // Enable analytics/tracking here if needed
+        console.log('Cookies accepted');
+    }
+    
+    function declineCookies() {
+        localStorage.setItem('cookieConsent', 'declined');
+        localStorage.setItem('cookieConsentDate', new Date().toISOString());
+        hideCookiePopup();
+        
+        // Disable analytics/tracking here
+        console.log('Cookies declined');
+    }
+    
+    function hideCookiePopup() {
+        const popup = document.getElementById('cookieConsent');
+        popup.classList.remove('show');
+        
+        // Remove from DOM after animation
+        setTimeout(() => {
+            popup.remove();
+        }, 400);
+    }
+    
+    // Check on page load
+    document.addEventListener('DOMContentLoaded', checkCookieConsent);
+</script>

@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lapor Kendala Pembayaran - SiBersih{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #F0FDFA 0%, #ECFEFF 100%);
+        min-height: 100vh;
+    }
+
+    .report-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+    
+    .report-card {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+    }
+    
+    .report-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .report-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+    
+    .report-header h1 {
+        font-size: 2rem;
+        color: #0F766E;
+        margin-bottom: 0.5rem;
+    }
+    
+    .report-header p {
+        color: #64748B;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #334155;
+        font-weight: 600;
+    }
+    
+    .form-group select,
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.875rem;
+        border: 2px solid #E2E8F0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-group select:focus,
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #14B8A6;
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+    }
+    
+    .form-group textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+    
+    .file-upload {
+        border: 2px dashed #CBD5E1;
+        border-radius: 10px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .file-upload:hover {
+        border-color: #14B8A6;
+        background: #F0FDFA;
+    }
+    
+    .file-upload-icon {
+        font-size: 3rem;
+        color: #64748B;
+        margin-bottom: 0.5rem;
+    }
+    
+    .file-upload-text {
+        color: #64748B;
+    }
+    
+    .file-upload input[type="file"] {
+        display: none;
+    }
+    
+    .btn {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        color: white;
+        width: 100%;
+        margin-top: 1rem;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(20, 184, 166, 0.4);
+    }
+    
+    .btn-secondary {
+        background: #F1F5F9;
+        color: #64748B;
+        text-decoration: none;
+        display: inline-block;
+        margin-right: 1rem;
+    }
+    
+    .btn-secondary:hover {
+        background: #E2E8F0;
+    }
+    
+    .required {
+        color: #EF4444;
+    }
+    
+    .help-text {
+        font-size: 0.875rem;
+        color: #64748B;
+        margin-top: 0.25rem;
+    }
+</style>
+
+<div class="report-container">
+    <div class="report-card">
+        <div class="report-header">
+            <div class="report-icon">🆘</div>
+            <h1>Lapor Kendala Pembayaran</h1>
+            <p>Laporkan masalah pembayaran Anda dan kami akan segera membantu</p>
+        </div>
+        
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>Terkait Order (Opsional)</label>
+                <select name="order">
+                    <option value="">-- Tidak terkait order tertentu --</option>
+                    {% for order in user_orders %}
+                    <option value="{{ order.id }}">{{ order.order_number }} - {{ order.laundry.name }} ({{ order.created_at|date:"d M Y" }})</option>
+                    {% endfor %}
+                </select>
+                <div class="help-text">Pilih order jika kendala terkait pesanan tertentu</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Jenis Kendala <span class="required">*</span></label>
+                <select name="issue_type" required>
+                    <option value="">-- Pilih jenis kendala --</option>
+                    <option value="payment_failed">Pembayaran Gagal</option>
+                    <option value="wrong_amount">Nominal Salah</option>
+                    <option value="not_verified">Belum Diverifikasi</option>
+                    <option value="refund_request">Permintaan Refund</option>
+                    <option value="other">Lainnya</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Subjek <span class="required">*</span></label>
+                <input type="text" name="subject" required placeholder="Judul singkat masalah Anda" maxlength="200">
+            </div>
+            
+            <div class="form-group">
+                <label>Deskripsi Masalah <span class="required">*</span></label>
+                <textarea name="description" required placeholder="Jelaskan masalah Anda secara detail..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Screenshot/Bukti (Opsional)</label>
+                <div class="file-upload" onclick="document.getElementById('screenshot').click()">
+                    <div class="file-upload-icon">📷</div>
+                    <div class="file-upload-text">
+                        <strong>Klik untuk upload screenshot</strong>
+                        <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">JPG, PNG, max 5MB</p>
+                    </div>
+                    <input type="file" id="screenshot" name="screenshot" accept="image/*">
+                </div>
+                <div class="help-text">Screenshot dapat membantu kami memahami masalah Anda</div>
+            </div>
+            
+            <div style="margin-top: 2rem;">
+                <a href="{% url 'orders:my_issues' %}" class="btn btn-secondary">Lihat Laporan Saya</a>
+                <button type="submit" class="btn btn-submit">📨 Kirim Laporan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Show selected file name
+    document.getElementById('screenshot').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name;
+        if (fileName) {
+            document.querySelector('.file-upload-text strong').textContent = fileName;
+        }
+    });
+</script>
+{% endblock %}

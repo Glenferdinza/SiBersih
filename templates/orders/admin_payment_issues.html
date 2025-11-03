@@ -1,0 +1,428 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kendala Pembayaran - Admin{% endblock %}
+
+{% block navbar %}
+{% include 'components/dashboard_navbar.html' %}
+{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 100%);
+        min-height: 100vh;
+    }
+
+    .admin-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+    
+    .admin-header {
+        background: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        color: white;
+        margin-bottom: 2rem;
+    }
+    
+    .admin-header h1 {
+        font-size: 2rem;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 30px rgba(0,0,0,0.12);
+    }
+    
+    .stat-card.open {
+        border-left: 4px solid #F59E0B;
+    }
+    
+    .stat-card.in_progress {
+        border-left: 4px solid #3B82F6;
+    }
+    
+    .stat-card.resolved {
+        border-left: 4px solid #10B981;
+    }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-label {
+        color: #64748B;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #7C3AED;
+    }
+    
+    .filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .filter-btn {
+        padding: 0.875rem 1.5rem;
+        border-radius: 12px;
+        background: white;
+        border: 2px solid #E2E8F0;
+        cursor: pointer;
+        font-weight: 600;
+        color: #64748B;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    
+    .filter-btn:hover {
+        border-color: #7C3AED;
+    }
+    
+    .filter-btn.active {
+        background: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%);
+        color: white;
+        border-color: #7C3AED;
+    }
+    
+    .issue-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    
+    .issue-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #F1F5F9;
+    }
+    
+    .ticket-info {
+        flex: 1;
+    }
+    
+    .ticket-number {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #7C3AED;
+        margin-bottom: 0.5rem;
+    }
+    
+    .user-info {
+        color: #64748B;
+        font-size: 0.9rem;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    
+    .status-open {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+    
+    .status-in_progress {
+        background: #DBEAFE;
+        color: #1E40AF;
+    }
+    
+    .status-resolved {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+    
+    .status-closed {
+        background: #F1F5F9;
+        color: #64748B;
+    }
+    
+    .issue-subject {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1E293B;
+        margin-bottom: 0.75rem;
+    }
+    
+    .issue-meta {
+        display: flex;
+        gap: 2rem;
+        color: #64748B;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .issue-description {
+        color: #475569;
+        line-height: 1.6;
+        background: #F8FAFC;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    
+    .response-form {
+        background: #FAF5FF;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-top: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #334155;
+        font-weight: 600;
+    }
+    
+    .form-group textarea {
+        width: 100%;
+        padding: 0.875rem;
+        border: 2px solid #E2E8F0;
+        border-radius: 10px;
+        font-size: 1rem;
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #7C3AED;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-right: 0.5rem;
+    }
+    
+    .btn-respond {
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        color: white;
+    }
+    
+    .btn-respond:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-resolve {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .btn-resolve:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+    
+    .btn-close {
+        background: #F1F5F9;
+        color: #64748B;
+    }
+    
+    .btn-close:hover {
+        background: #E2E8F0;
+    }
+    
+    .admin-response-display {
+        background: #ECFDF5;
+        border-left: 4px solid #10B981;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-top: 1rem;
+    }
+    
+    .response-header {
+        color: #065F46;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .response-text {
+        color: #334155;
+        line-height: 1.6;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 20px;
+    }
+    
+    .empty-state-icon {
+        font-size: 5rem;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>🆘 Kendala Pembayaran Customer</h1>
+        <p>Kelola dan tanggapi laporan kendala dari pelanggan</p>
+    </div>
+    
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <a href="?status=open" class="stat-card open" style="text-decoration: none;">
+            <div class="stat-icon">🆕</div>
+            <div class="stat-label">Baru / Open</div>
+            <div class="stat-value">{{ open_count }}</div>
+        </a>
+        
+        <a href="?status=in_progress" class="stat-card in_progress" style="text-decoration: none;">
+            <div class="stat-icon">🔄</div>
+            <div class="stat-label">Sedang Ditangani</div>
+            <div class="stat-value">{{ in_progress_count }}</div>
+        </a>
+        
+        <a href="?status=resolved" class="stat-card resolved" style="text-decoration: none;">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">Selesai</div>
+            <div class="stat-value">{{ resolved_count }}</div>
+        </a>
+    </div>
+    
+    <!-- Filters -->
+    <div class="filters">
+        <a href="?status=all" class="filter-btn {% if status_filter == 'all' %}active{% endif %}">Semua</a>
+        <a href="?status=open" class="filter-btn {% if status_filter == 'open' %}active{% endif %}">Open</a>
+        <a href="?status=in_progress" class="filter-btn {% if status_filter == 'in_progress' %}active{% endif %}">In Progress</a>
+        <a href="?status=resolved" class="filter-btn {% if status_filter == 'resolved' %}active{% endif %}">Resolved</a>
+        <a href="?status=closed" class="filter-btn {% if status_filter == 'closed' %}active{% endif %}">Closed</a>
+    </div>
+    
+    <!-- Issues List -->
+    {% if issues %}
+        {% for issue in issues %}
+        <div class="issue-card">
+            <div class="issue-header">
+                <div class="ticket-info">
+                    <div class="ticket-number">{{ issue.ticket_number }}</div>
+                    <div class="user-info">
+                        👤 {{ issue.user.username }} ({{ issue.user.email }})
+                        {% if issue.order %}
+                        | 📦 {{ issue.order.order_number }}
+                        {% endif %}
+                    </div>
+                </div>
+                <span class="status-badge status-{{ issue.status }}">{{ issue.get_status_display }}</span>
+            </div>
+            
+            <div class="issue-subject">{{ issue.subject }}</div>
+            
+            <div class="issue-meta">
+                <span>🏷️ {{ issue.get_issue_type_display }}</span>
+                <span>📅 {{ issue.created_at|date:"d M Y H:i" }}</span>
+            </div>
+            
+            <div class="issue-description">
+                {{ issue.description }}
+            </div>
+            
+            {% if issue.screenshot %}
+            <div style="margin-bottom: 1rem;">
+                <a href="{{ issue.screenshot.url }}" target="_blank" style="color: #7C3AED;">
+                    📎 Lihat Screenshot
+                </a>
+            </div>
+            {% endif %}
+            
+            {% if issue.admin_response %}
+            <div class="admin-response-display">
+                <div class="response-header">
+                    <span>💬 Tanggapan Anda</span>
+                    <span style="font-weight: normal; font-size: 0.85rem; color: #64748B;">
+                        oleh {{ issue.responded_by.username }} - {{ issue.responded_at|date:"d M Y H:i" }}
+                    </span>
+                </div>
+                <div class="response-text">{{ issue.admin_response }}</div>
+            </div>
+            {% endif %}
+            
+            {% if issue.status != 'closed' %}
+            <div class="response-form">
+                <form method="POST" action="{% url 'orders:respond_to_issue' issue.id %}">
+                    {% csrf_token %}
+                    
+                    {% if not issue.admin_response %}
+                    <div class="form-group">
+                        <label>Tanggapan untuk {{ issue.user.username }}</label>
+                        <textarea name="admin_response" placeholder="Tulis tanggapan Anda..." required></textarea>
+                    </div>
+                    
+                    <input type="hidden" name="action" value="respond">
+                    <button type="submit" class="btn btn-respond">📨 Kirim Tanggapan</button>
+                    {% endif %}
+                    
+                    {% if issue.status != 'resolved' %}
+                    <input type="hidden" name="action" value="resolve">
+                    <button type="submit" class="btn btn-resolve" onclick="this.form.querySelector('input[name=action]').value='resolve'">
+                        ✅ Tandai Selesai
+                    </button>
+                    {% endif %}
+                    
+                    <input type="hidden" name="action" value="close">
+                    <button type="submit" class="btn btn-close" onclick="this.form.querySelector('input[name=action]').value='close'">
+                        🚫 Tutup Tiket
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <h2>Tidak ada laporan kendala</h2>
+            <p>Belum ada laporan kendala pembayaran dari pelanggan</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

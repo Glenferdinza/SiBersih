@@ -1,0 +1,9 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#E8F9F6"/>
+  <circle cx="400" cy="250" r="100" fill="#00BFA6" opacity="0.2"/>
+  <circle cx="400" cy="250" r="80" fill="#00BFA6" opacity="0.3"/>
+  <circle cx="400" cy="250" r="60" fill="#00BFA6" opacity="0.5"/>
+  <path d="M350 200 Q400 180 450 200 L450 280 Q400 300 350 280 Z" fill="white" opacity="0.8"/>
+  <text x="400" y="380" font-family="Arial, sans-serif" font-size="32" font-weight="300" fill="#006E60" text-anchor="middle">Laundry Services</text>
+  <text x="400" y="420" font-family="Arial, sans-serif" font-size="18" font-weight="300" fill="#00BFA6" text-anchor="middle">Cepat, Bersih, Terpercaya</text>
+</svg>
