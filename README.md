@@ -141,16 +141,25 @@ SiBersih/
 
 ## 🌐 Deployment ke Azure
 
-Kami menyediakan panduan lengkap untuk deploy ke Azure Web App:
+Kami menyediakan **2 panduan deployment** untuk Azure Web App:
 
-📖 **[Baca Panduan Deployment](AZURE_DEPLOYMENT.md)**
+### �️ **Option 1: Azure Portal (GUI) - RECOMMENDED untuk Pemula**
+📖 **[Panduan Lengkap via Portal](AZURE_DEPLOYMENT_PORTAL.md)** - Step-by-step dengan screenshot
 
-### Quick Deploy
+**✅ Checklist:** [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) - Print & centang setiap step!
+
+**Kenapa pilih ini?**
+- ✅ Lebih mudah (point & click)
+- ✅ Visual dan jelas
+- ✅ Tidak perlu install Azure CLI
+- ✅ Cocok untuk pemula
+
+### ⌨️ **Option 2: Azure CLI (Command Line)**
+📖 **[Panduan via CLI](AZURE_DEPLOYMENT.md)** - Untuk advanced users
+
 ```bash
-# Login to Azure
+# Quick Deploy
 az login
-
-# Deploy dengan Azure CLI
 az webapp up \
   --name sibersih-app \
   --resource-group sibersih-rg \
