@@ -31,7 +31,7 @@ az account set --subscription "SUBSCRIPTION_NAME"
 ### 2.1 Buat Resource Group
 ```bash
 az group create \
-  --name sibersih-rg \
+  --name laundrysibersih-rg \
   --location southeastasia
 ```
 
@@ -39,7 +39,7 @@ az group create \
 ```bash
 az mysql flexible-server create \
   --name sibersih-mysql-server \
-  --resource-group sibersih-rg \
+  --resource-group laundrysibersih-rg \
   --location southeastasia \
   --admin-user adminuser \
   --admin-password "YourStrongPassword123!" \
@@ -58,7 +58,7 @@ az mysql flexible-server create \
 ### 2.3 Buat Database
 ```bash
 az mysql flexible-server db create \
-  --resource-group sibersih-rg \
+  --resource-group laundrysibersih-rg \
   --server-name sibersih-mysql-server \
   --database-name sibersih
 ```
@@ -67,7 +67,7 @@ az mysql flexible-server db create \
 ```bash
 # Allow Azure services
 az mysql flexible-server firewall-rule create \
-  --resource-group sibersih-rg \
+  --resource-group laundrysibersih-rg \
   --name sibersih-mysql-server \
   --rule-name AllowAzureServices \
   --start-ip-address 0.0.0.0 \
@@ -75,7 +75,7 @@ az mysql flexible-server firewall-rule create \
 
 # Allow your IP (untuk development)
 az mysql flexible-server firewall-rule create \
-  --resource-group sibersih-rg \
+  --resource-group laundrysibersih-rg \
   --name sibersih-mysql-server \
   --rule-name AllowMyIP \
   --start-ip-address YOUR_IP \
@@ -90,7 +90,7 @@ az mysql flexible-server firewall-rule create \
 ```bash
 az appservice plan create \
   --name sibersih-plan \
-  --resource-group sibersih-rg \
+  --resource-group laundrysibersih-rg \
   --location southeastasia \
   --sku B1 \
   --is-linux
@@ -100,7 +100,7 @@ az appservice plan create \
 ```bash
 az webapp create \
   --name sibersih-app \
-  --resource-group sibersih-rg \
+  --resource-group laundrysibersih-rg \
   --plan sibersih-plan \
   --runtime "PYTHON:3.12"
 ```
@@ -117,7 +117,7 @@ python -c "from django.core.management.utils import get_random_secret_key; print
 
 # Set environment variables
 az webapp config appsettings set \
-  --resource-group sibersih-rg \
+  --resource-group laundrysibersih-rg \
   --name sibersih-app \
   --settings \
     SECRET_KEY="generated-secret-key-here" \
@@ -141,7 +141,7 @@ az webapp config appsettings set \
 ```bash
 az webapp deployment source config \
   --name sibersih-app \
-  --resource-group sibersih-rg \
+  --resource-group laundrysibersih-rg \
   --repo-url https://github.com/Glenferdinza/SiBersih.git \
   --branch master \
   --manual-integration
@@ -150,7 +150,7 @@ az webapp deployment source config \
 ### 5.2 Set Startup Command
 ```bash
 az webapp config set \
-  --resource-group sibersih-rg \
+  --resource-group laundrysibersih-rg \
   --name sibersih-app \
   --startup-file "startup.sh"
 ```
@@ -159,7 +159,7 @@ az webapp config set \
 ```bash
 az webapp log config \
   --name sibersih-app \
-  --resource-group sibersih-rg \
+  --resource-group laundrysibersih-rg \
   --docker-container-logging filesystem \
   --level information
 ```
@@ -178,7 +178,7 @@ az webapp log config \
 ```bash
 az webapp deployment source sync \
   --name sibersih-app \
-  --resource-group sibersih-rg
+  --resource-group laundrysibersih-rg
 ```
 
 ---
@@ -189,7 +189,7 @@ az webapp deployment source sync \
 ```bash
 az webapp ssh \
   --name sibersih-app \
-  --resource-group sibersih-rg
+  --resource-group laundrysibersih-rg
 ```
 
 ### 7.2 Jalankan Migrasi
@@ -221,12 +221,12 @@ Buka: `https://sibersih-app.azurewebsites.net`
 # Real-time logs
 az webapp log tail \
   --name sibersih-app \
-  --resource-group sibersih-rg
+  --resource-group laundrysibersih-rg
 
 # Download logs
 az webapp log download \
   --name sibersih-app \
-  --resource-group sibersih-rg \
+  --resource-group laundrysibersih-rg \
   --log-file logs.zip
 ```
 
@@ -241,7 +241,7 @@ Buka: `https://sibersih-app.azurewebsites.net/admin/`
 ```bash
 # Tambahkan domain ke ALLOWED_HOSTS
 az webapp config appsettings set \
-  --resource-group sibersih-rg \
+  --resource-group laundrysibersih-rg \
   --name sibersih-app \
   --settings ALLOWED_HOSTS="sibersih-app.azurewebsites.net,*.azurewebsites.net"
 ```
@@ -249,7 +249,7 @@ az webapp config appsettings set \
 ### 2. Static Files tidak muncul
 ```bash
 # SSH ke web app dan jalankan collectstatic
-az webapp ssh --name sibersih-app --resource-group sibersih-rg
+az webapp ssh --name sibersih-app --resource-group laundrysibersih-rg
 python manage.py collectstatic --noinput
 ```
 
@@ -257,7 +257,7 @@ python manage.py collectstatic --noinput
 ```bash
 # Cek firewall rules
 az mysql flexible-server firewall-rule list \
-  --resource-group sibersih-rg \
+  --resource-group laundrysibersih-rg \
   --name sibersih-mysql-server
 
 # Test connection
@@ -270,7 +270,7 @@ mysql -h sibersih-mysql-server.mysql.database.azure.com \
 ```bash
 az webapp restart \
   --name sibersih-app \
-  --resource-group sibersih-rg
+  --resource-group laundrysibersih-rg
 ```
 
 ---
@@ -288,7 +288,7 @@ git push origin master
 ```bash
 az webapp deployment source sync \
   --name sibersih-app \
-  --resource-group sibersih-rg
+  --resource-group laundrysibersih-rg
 ```
 
 ---
@@ -300,7 +300,7 @@ az webapp deployment source sync \
 # Gunakan F1 tier (gratis)
 az appservice plan update \
   --name sibersih-plan \
-  --resource-group sibersih-rg \
+  --resource-group laundrysibersih-rg \
   --sku F1
 ```
 
@@ -319,12 +319,12 @@ az appservice plan update \
 az monitor app-insights component create \
   --app sibersih-insights \
   --location southeastasia \
-  --resource-group sibersih-rg \
+  --resource-group laundrysibersih-rg \
   --application-type web
 
 # Link to Web App
 az webapp config appsettings set \
-  --resource-group sibersih-rg \
+  --resource-group laundrysibersih-rg \
   --name sibersih-app \
   --settings APPINSIGHTS_INSTRUMENTATIONKEY="<key-from-previous-command>"
 ```
@@ -352,7 +352,7 @@ az webapp config appsettings set \
 ## 🆘 Support
 
 Jika ada masalah:
-1. Cek logs: `az webapp log tail --name sibersih-app --resource-group sibersih-rg`
+1. Cek logs: `az webapp log tail --name sibersih-app --resource-group laundrysibersih-rg`
 2. Review Azure Portal → App Service → Diagnose and solve problems
 3. Check GitHub Issues: https://github.com/Glenferdinza/SiBersih/issues
 

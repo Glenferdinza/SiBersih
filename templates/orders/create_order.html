@@ -500,16 +500,19 @@
             <form method="post" id="orderForm">
                 {% csrf_token %}
                 
-                <!-- Selected Laundry Info -->
+                <!-- Laundry Selection -->
                 <div class="laundry-selector">
                     <h3>
                         <svg width="24" height="24" style="vertical-align: middle; margin-right: 8px;">
                             <use href="{% static 'icons/icons.svg' %}#icon-location"></use>
                         </svg>
-                        Laundry Terpilih
+                        Pilih Laundry
                     </h3>
+                    
+                    {% if selected_laundry %}
+                    <!-- Pre-selected laundry -->
                     <input type="hidden" name="laundry" id="laundrySelect" value="{{ selected_laundry.id }}">
-                    <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border-radius: 12px; padding: 20px; margin-top: 12px;">
+                    <div class="selected-laundry-card" style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border-radius: 12px; padding: 20px; margin-top: 12px;">
                         <h4 style="font-size: 1.2rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">{{ selected_laundry.name }}</h4>
                         <p style="color: #64748b; margin-bottom: 12px;">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;">
@@ -518,7 +521,7 @@
                             </svg>
                             {{ selected_laundry.address }}, {{ selected_laundry.district }}
                         </p>
-                        <div style="display: flex; gap: 20px; align-items: center;">
+                        <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
                             <div style="color: #0d9488; font-weight: 700;">
                                 Rp {{ selected_laundry.price_per_kg|floatformat:0 }}/kg
                             </div>
@@ -526,13 +529,28 @@
                                 ⭐ {{ selected_laundry.rating|floatformat:1 }}
                             </div>
                             <div style="color: #64748b;">
-                                ⏱️ ~{{ selected_laundry.estimated_pickup_time }} mnt
+                                📍 {{ selected_laundry.distance|floatformat:1 }} km
                             </div>
                         </div>
-                        <a href="{% url 'core:dashboard' %}" style="display: inline-block; margin-top: 12px; color: #0d9488; text-decoration: underline; font-size: 0.9rem;">
-                            ← Ganti laundry
-                        </a>
+                        <button type="button" onclick="showAllLaundries()" style="margin-top: 12px; background: white; color: #0d9488; border: 2px solid #0d9488; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                            Ganti Laundry
+                        </button>
                     </div>
+                    {% else %}
+                    <!-- No laundry selected, show dropdown -->
+                    <select name="laundry" id="laundrySelect" required style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem; margin-top: 12px;">
+                        <option value="">-- Pilih Laundry --</option>
+                        {% for laundry in all_laundries %}
+                        <option value="{{ laundry.id }}" 
+                                data-price="{{ laundry.price_per_kg }}"
+                                data-name="{{ laundry.name }}"
+                                data-distance="{{ laundry.distance|floatformat:1 }}"
+                                data-rating="{{ laundry.rating|floatformat:1 }}">
+                            {{ laundry.name }} - Rp {{ laundry.price_per_kg|floatformat:0 }}/kg ({{ laundry.distance|floatformat:1 }} km) ⭐ {{ laundry.rating|floatformat:1 }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    {% endif %}
                 </div>
                 
                 <!-- Order Details -->
@@ -871,18 +889,48 @@
         }
     }
     
+    // Show all laundries (for "Ganti Laundry" button)
+    function showAllLaundries() {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('laundry');  // Remove laundry parameter
+        window.location.href = url.toString();
+    }
+    
     // Store laundry data from Django context
     const laundryDataElement = document.getElementById('laundry-data');
-    const laundryData = laundryDataElement ? JSON.parse(laundryDataElement.textContent) : {
+    let laundryData = {};
+    
+    {% if selected_laundry %}
+    laundryData = {
         pricePerKg: parseFloat('{{ selected_laundry.price_per_kg }}'),
         name: '{{ selected_laundry.name|escapejs }}',
         address: '{{ selected_laundry.address|escapejs }}, {{ selected_laundry.district|escapejs }}'
     };
+    {% else %}
+    laundryData = {
+        pricePerKg: 0,
+        name: '',
+        address: ''
+    };
+    {% endif %}
+    
+    // Update laundry data when dropdown changes
+    const laundryDropdown = document.getElementById('laundrySelect');
+    if (laundryDropdown && laundryDropdown.tagName === 'SELECT') {
+        laundryDropdown.addEventListener('change', function() {
+            const selected = this.options[this.selectedIndex];
+            if (selected && selected.value) {
+                laundryData.pricePerKg = parseFloat(selected.dataset.price) || 0;
+                laundryData.name = selected.dataset.name || '';
+                calculatePrice();  // Recalculate with new laundry price
+            }
+        });
+    }
     
     function calculatePrice() {
         const weight = parseFloat(document.getElementById('weight_kg').value) || 0;
         
-        if (weight > 0) {
+        if (weight > 0 && laundryData.pricePerKg > 0) {
             const laundryPrice = laundryData.pricePerKg * weight;
             const codFee = getCODFee(defaultDistance);
             const platformFee = laundryPrice * 0.03;

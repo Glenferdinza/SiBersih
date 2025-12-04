@@ -1,12 +1,13 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from orders.models import Order, Service
 from partners.models import MitraProfile, Laundry, MitraRequest
 from math import radians, sin, cos, sqrt, atan2
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from datetime import datetime, timedelta
 from django.db.models import Sum, Count, Q
+from django.utils import timezone
 import csv
 import json
 
@@ -120,6 +121,8 @@ def admin_dashboard(request):
         'mitra_requests': mitra_requests[:5],  # Show only first 5
         'revenue_data': json.dumps(revenue_data),
         'revenue_labels': json.dumps(revenue_labels),
+        'orders_labels': json.dumps(revenue_labels),  # Same as revenue labels
+        'orders_data': json.dumps([0] * 7),  # Placeholder data
         'status_counts': json.dumps(status_counts),
         'recent_orders': recent_orders,
     }
@@ -298,4 +301,85 @@ def export_orders_csv(request):
         ])
     
     return response
+
+
+@login_required
+def approve_mitra_request(request, request_id):
+    """Admin approve mitra request"""
+    if request.user.role != 'admin':
+        return JsonResponse({'success': False, 'error': 'Akses ditolak'}, status=403)
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'}, status=400)
+    
+    try:
+        mitra_request = get_object_or_404(MitraRequest, id=request_id)
+        
+        if mitra_request.status != 'pending':
+            return JsonResponse({'success': False, 'error': 'Request sudah diproses'})
+        
+        # Update request status
+        mitra_request.status = 'approved'
+        mitra_request.save()
+        
+        # Update user role to mitra (jangan langsung save, cek dulu)
+        user = mitra_request.user
+        
+        # Create or update mitra profile (jika sudah ada, skip)
+        mitra_profile, created = MitraProfile.objects.get_or_create(
+            user=user,
+            defaults={
+                'business_name': mitra_request.business_name,
+                'location': mitra_request.location,
+                'description': mitra_request.description,
+                'operational_cost': mitra_request.operational_cost or 0,
+                'is_active': True
+            }
+        )
+        
+        # Jangan langsung ubah role, biarkan user yang switch sendiri di settings
+        # user.role = 'mitra'
+        # user.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Request dari {user.get_full_name()} disetujui. User dapat mengaktifkan role mitra di Settings.'
+        })
+        
+    except Exception as e:
+        import traceback
+        print(f"Error in approve_mitra_request: {str(e)}")
+        print(traceback.format_exc())
+        return JsonResponse({'success': False, 'error': f'Server error: {str(e)}'}, status=500)
+
+
+@login_required
+def reject_mitra_request(request, request_id):
+    """Admin reject mitra request"""
+    if request.user.role != 'admin':
+        return JsonResponse({'success': False, 'error': 'Akses ditolak'}, status=403)
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'}, status=400)
+    
+    try:
+        mitra_request = get_object_or_404(MitraRequest, id=request_id)
+        
+        if mitra_request.status != 'pending':
+            return JsonResponse({'success': False, 'error': 'Request sudah diproses'})
+        
+        # Update request status
+        mitra_request.status = 'rejected'
+        mitra_request.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Request dari {mitra_request.user.get_full_name()} ditolak'
+        })
+        
+    except Exception as e:
+        import traceback
+        print(f"Error in reject_mitra_request: {str(e)}")
+        print(traceback.format_exc())
+        return JsonResponse({'success': False, 'error': f'Server error: {str(e)}'}, status=500)
 

@@ -32,7 +32,7 @@ Panduan lengkap deploy SiBersih ke Azure menggunakan Azure Portal (Web Browser) 
 3. Isi form:
    ```
    Subscription: [Pilih subscription Anda]
-   Resource group name: sibersih-rg
+   Resource group name: laundrysibersih-rg
    Region: Southeast Asia (Singapore)
    ```
 4. Klik **Review + Create** → **Create**
@@ -47,7 +47,7 @@ Panduan lengkap deploy SiBersih ke Azure menggunakan Azure Portal (Web Browser) 
 **BASICS TAB:**
 ```
 Subscription: [Subscription Anda]
-Resource group: sibersih-rg
+Resource group: laundrysibersih-rg
 Server name: sibersih-mysql-server
 Region: Southeast Asia
 MySQL version: 8.0.21
@@ -118,7 +118,7 @@ Firewall rules:
 **BASICS TAB:**
 ```
 Subscription: [Subscription Anda]
-Resource group: sibersih-rg
+Resource group: laundrysibersih-rg
 Name: sibersih-app
    (Catatan: Harus unik global. Jika sibersih-app sudah terpakai,
     coba: sibersih-app-glen atau sibersih-app-2024)

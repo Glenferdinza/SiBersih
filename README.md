@@ -162,7 +162,7 @@ Kami menyediakan **2 panduan deployment** untuk Azure Web App:
 az login
 az webapp up \
   --name sibersih-app \
-  --resource-group sibersih-rg \
+  --resource-group laundrysibersih-rg \
   --runtime "PYTHON:3.12" \
   --sku B1
 ```

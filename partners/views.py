@@ -37,11 +37,16 @@ def apply_mitra(request):
         # Other info
         description = request.POST.get('description', '')
         
-        # Create mitra request (simplified - we'll update MitraRequest model later)
+        # Create mitra request with all fields
         mitra_request = MitraRequest.objects.create(
             user=request.user,
             business_name=business_name,
             location=address,  # Using address for location
+            address=address,
+            phone_number=phone,
+            bank_name=bank_name,
+            account_number=account_number,
+            account_holder=account_holder,
             description=description,
             operational_cost=0  # Not needed for mitra application
         )

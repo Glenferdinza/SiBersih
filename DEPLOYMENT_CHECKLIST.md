@@ -18,7 +18,7 @@ Gunakan checklist ini saat deploy via Azure Portal.
 ### ☑️ Step 1: Resource Group
 ```
 Portal → Create a resource → Resource Group
-Nama: sibersih-rg
+Nama: laundrysibersih-rg
 Region: Southeast Asia
 → Create
 ```
@@ -249,7 +249,7 @@ Local changes → git push → GitHub Actions → Azure Auto-Deploy
 ## 🆘 SUPPORT LINKS
 
 - **Azure Portal:** https://portal.azure.com
-- **Resource Group:** Portal → sibersih-rg
+- **Resource Group:** Portal → laundrysibersih-rg
 - **Web App:** Portal → App Services → sibersih-app
 - **MySQL:** Portal → Azure Database for MySQL → sibersih-mysql-server
 - **GitHub Repo:** https://github.com/Glenferdinza/SiBersih

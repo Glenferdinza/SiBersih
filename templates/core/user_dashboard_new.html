@@ -806,6 +806,7 @@
                     
                     <button class="btn-select-laundry btn-select-laundry-action" 
                             data-laundry-id="{{ laundry.id }}"
+                            onclick="selectLaundry({{ laundry.id }})"
                             {% if laundry.status == 'tutup' or laundry.status == 'full' %}disabled{% endif %}>
                         <span>{% if laundry.status == 'tutup' or laundry.status == 'full' %}Tidak Tersedia{% else %}Lihat Laundry{% endif %}</span>
                         {% if laundry.status == 'buka' %}

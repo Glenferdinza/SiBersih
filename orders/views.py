@@ -12,15 +12,13 @@ from django.conf import settings
 
 @login_required
 def create_order(request):
-    # Get laundry_id from URL parameter
+    # Get laundry_id from URL parameter (optional now)
     laundry_id = request.GET.get('laundry')
+    selected_laundry = None
     
-    # If no laundry selected, redirect to dashboard to choose one
-    if not laundry_id:
-        messages.info(request, 'Silakan pilih laundry terlebih dahulu')
-        return redirect('core:dashboard')
-    
-    selected_laundry = get_object_or_404(Laundry, id=laundry_id, is_active=True)
+    # If laundry pre-selected from dashboard
+    if laundry_id:
+        selected_laundry = get_object_or_404(Laundry, id=laundry_id, is_active=True)
     
     if request.method == 'POST':
         laundry_id = request.POST.get('laundry')
@@ -118,15 +116,23 @@ def create_order(request):
     user_lat = request.session.get('user_latitude', -7.797068)  # Yogyakarta default
     user_lon = request.session.get('user_longitude', 110.370529)
     
-    # Calculate distance for selected laundry
-    distance = selected_laundry.calculate_distance(float(user_lat), float(user_lon))
-    selected_laundry.distance = distance
+    # Get all available laundries for selection
+    all_laundries = Laundry.objects.filter(is_active=True, status='buka')
+    
+    # Calculate distance for all laundries
+    for laundry in all_laundries:
+        distance = laundry.calculate_distance(float(user_lat), float(user_lon))
+        laundry.distance = distance
+    
+    # Sort by distance
+    all_laundries = sorted(all_laundries, key=lambda x: x.distance if x.distance else float('inf'))
     
     # Get COD rates for display
     cod_rates = CODRate.objects.filter(is_active=True).order_by('min_distance_km')
     
     context = {
         'selected_laundry': selected_laundry,
+        'all_laundries': all_laundries,
         'cod_rates': cod_rates,
         'user_lat': user_lat,
         'user_lon': user_lon,
